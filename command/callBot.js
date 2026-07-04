@@ -24,7 +24,7 @@ export const Init_command = {
             updateLastUsed(interaction);
             await interaction.reply({content:`Hello ${user.username} 👋`,flags: MessageFlags.Ephemeral});
         }else{
-            // await interaction.reply({content:`Yah I am Interesting to Meet ${user.username} HEHE But You Are not Sign Up Please Sign up First!`,flags: MessageFlags.Ephemeral});
+            //await interaction.user.send("Hello 👋 This is DM from bot");
             await Signup(interaction);
         }
         //await interaction.channel.send(`Welcome ${user.username} to the server! 🎉`);
