@@ -10,8 +10,8 @@ export function updateLastUsed(interaction) {
     const data = JSON.parse(raw);
 
     // แก้แค่ 2 ค่านี้ ค่าอื่น (id, joinedAt) คงเดิม
-    data.Last_Discord_Call = interaction.guild.id;
-    data.Last_Chanel_Call = interaction.channel.id;
+    data.Last_Discord_Call = interaction.guild?.id || "Direct_msg";
+    data.Last_Chanel_Call = interaction.channel?.id || "Direct_msg";
     data.Last_call = new Date().toLocaleString("en-GB", {
                                                           timeZone: "Asia/Bangkok",
                                                         }) 

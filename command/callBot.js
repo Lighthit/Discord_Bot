@@ -17,8 +17,8 @@ export const Init_command = {
         const user = interaction.user;
         //console.log(user.id);           //ไม่มีวันเปลี่ยนแม้เปลี่ยนชื่อ
         //console.log(user.username);
-        console.log("Guild ID:", interaction.guild.id);  //server discord ที่ถูกเรียก
-        console.log("Channel ID:", interaction.channel.id); //chenel ที่ถูกเรียก
+        console.log("Guild ID:", interaction.guild?.id || "Direct_msg");  //server discord ที่ถูกเรียก
+        console.log("Channel ID:", interaction.channel?.id || "Direct_msg"); //chenel ที่ถูกเรียก
         
         if (files.includes(`${user.id}.json`)){
             updateLastUsed(interaction);

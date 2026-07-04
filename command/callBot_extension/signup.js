@@ -60,8 +60,8 @@ export async function handleSignUpButton(interaction) {
         const userData = {
             id: interaction.user.id,
             //username: interaction.user.username,
-            Last_Chanel_Call:interaction.guild.id,
-            Last_Discord_Call:interaction.channel.id,
+            Last_Chanel_Call:interaction.guild?.id || "Direct_msg",
+            Last_Discord_Call:interaction.channel?.id || "Direct_msg",
             joinedAt: new Date().toLocaleString("en-GB", {
                                                           timeZone: "Asia/Bangkok",
                                                         }),
