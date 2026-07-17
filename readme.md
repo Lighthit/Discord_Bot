@@ -29,20 +29,32 @@ To activate the bot, an **Administrator** must run the following command in the 
 
 Once activated, the bot will start responding to interactions and begin providing the features listed below.
 
-## Current Feature
+## Current Features
 
-- **Sign Up**
+- **Sign Up** — `/paimon`
   - Allows users to register/sign up through the bot.
   - Available immediately after activation via `/paimon`.
 
+- **Get Info** — `/get_info`
+  - Lets a registered user retrieve their own stored info from the bot.
+  - Requires the user to have signed up first; unregistered users will be prompted to run `/paimon`.
+
+- **Edit User** — `/edit_user`
+  - Sets a user's `AI_Model` and `AI_api_Keys` values in one command.
+  - Restricted to a whitelisted set of admin user IDs/roles — regular members cannot run this command.
+
 ## Future Feature
 
-- **Selection Buttons**
-  - Interactive buttons that let users activate specific features/options directly from a message, instead of typing commands.
+- **Ask AI** — `/ask_ai`
+  - Lets users ask the AI model directly through the bot.
+  - **Free tier**: shared pool of 50 requests/day across **all users combined** (not per-user).
+  - **Paid tier**: higher/unlimited usage available — requires contacting the bot owner/admin to arrange access.
+
 - **Notifications**
   - Automated notifications/alerts sent to users or channels for relevant events or updates.
 
 ## Notes
 
 - Only **Administrator** accounts can run the activation command.
+- `/edit_user` is further restricted to a specific whitelist of user IDs/roles, separate from the general Administrator role.
 - Future features (selection buttons, notifications) are planned and not yet available in the current build.
