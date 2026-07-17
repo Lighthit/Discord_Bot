@@ -67,7 +67,7 @@ export async function handleSignUpButton(interaction) {
             joinedAt: new Date().toLocaleString("en-GB", {
                                                           timeZone: "Asia/Bangkok",
                                                         }),
-            AI_Model:"nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+            AI_Model:"nvidia/nemotron-3-nano-30b-a3b:free",
             AI_api_Keys:"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"
 
         };
