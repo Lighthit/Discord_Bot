@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { REST, Routes } from "discord.js";
-import { Init_command } from "./command/callBot.js";
-
+import { Init_command } from "./command/signUp_slashCMD.js";
+import { getInfo } from "./command/getInfo_slash.js";
+import * as  editUserCommand from "./command/edit_userInfo.js"
 console.log("CLIENT_ID =", process.env.DISCORD_APPLICATION_ID);
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
@@ -10,7 +11,9 @@ await rest.put(
     Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID),
     {
         body: [
-            Init_command.data.toJSON()
+            Init_command.data.toJSON(),
+            getInfo.data.toJSON(),
+            editUserCommand.data.toJSON(),
         ],
     }
 );

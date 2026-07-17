@@ -46,9 +46,9 @@ export async function Signup(interaction) {
 
 export async function handleSignUpButton(interaction) {
     try {
-        const folderPath = path.join(process.cwd(), "users_id");
-        const filePath = path.join(folderPath, `${interaction.user.id}.json`);
- 
+        const folderPath_userId = path.join(process.cwd(), "users_id");
+        const folderPath_JobId_dir = path.join(process.cwd(),"jobs")
+        const filePath = path.join(folderPath_userId, `${interaction.user.id}.json`);
         // ถ้ามีไฟล์อยู่แล้ว ไม่ต้องสร้างซ้ำ
         if (fs.existsSync(filePath)) {
             return await interaction.reply({
@@ -56,7 +56,9 @@ export async function handleSignUpButton(interaction) {
                 flags: MessageFlags.Ephemeral,
             });
         }
- 
+        //create folder by using userId
+        const jobDir = path.join(folderPath_JobId_dir, interaction.user.id);
+        fs.mkdirSync(jobDir, { recursive: true });
         const userData = {
             id: interaction.user.id,
             //username: interaction.user.username,
@@ -65,9 +67,9 @@ export async function handleSignUpButton(interaction) {
             joinedAt: new Date().toLocaleString("en-GB", {
                                                           timeZone: "Asia/Bangkok",
                                                         }),
-            Last_call: new Date().toLocaleString("en-GB", {
-                                                          timeZone: "Asia/Bangkok",
-                                                        }) 
+            AI_Model:"nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+            AI_api_Keys:"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"
+
         };
  
         fs.writeFileSync(filePath, JSON.stringify(userData, null, 2));

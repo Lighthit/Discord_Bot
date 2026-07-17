@@ -1,25 +1,36 @@
 import "dotenv/config";
 import fs from "fs";
+import fsp from "fs/promises";    // ใช้ readFile, writeFile
 import path from "path";
 
 import {
     Client,
     Events,
     GatewayIntentBits,
+    MessageFlags,
+    User,
 } from "discord.js";
 
-import { Init_command } from "./command/callBot.js";
+import { Init_command } from "./command/signUp_slashCMD.js";
+import { getInfo } from "./command/getInfo_slash.js";
 import { handleSignUpButton } from "./command/callBot_extension/signup.js";
 import { updateLastUsed } from "./command/callBot_extension/Manages_Last_Use.js";
+import * as editUserCommand from './command/edit_userInfo.js';
 
-const folderPath = path.join(process.cwd(), "users_id");
-if (!fs.existsSync(folderPath)) {
-    fs.mkdirSync(folderPath, { recursive: true });
+const folderPath_userId = path.join(process.cwd(), "users_id");
+const folderPath_JobId_dir = path.join(process.cwd(),"jobs")
+if (!fs.existsSync(folderPath_userId)) {
+    fs.mkdirSync(folderPath_userId, { recursive: true });
+    console.log("Folder UserId created");
+} else {
+    console.log("Folder UserId already exists");
+}
+if (!fs.existsSync(folderPath_JobId_dir)) {
+    fs.mkdirSync(folderPath_JobId_dir, { recursive: true });
     console.log("Folder created");
 } else {
-    console.log("Folder already exists");
+    console.log("Folder Jobs  already exists");
 }
-
 const client = new Client({
     intents: [GatewayIntentBits.Guilds],
 });
@@ -29,11 +40,42 @@ client.once(Events.ClientReady, (client) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+    
     //Make last use and server Chanel RECORD!
     // ✅ Slash Command
     if (interaction.isChatInputCommand()) {
         if (interaction.commandName === Init_command.data.name) {
             await Init_command.execute(interaction);
+            return;
+        }
+
+        // เช็กว่าลงทะเบียนหรือยัง
+        const userFile = path.join(
+            process.cwd(),
+            "users_id",
+            `${interaction.user.id}.json`
+        );
+        let userData;
+        try {
+            let raw = await fsp.readFile(userFile, "utf8");
+            userData = JSON.parse(raw);   // ✅ แปลงเป็น object ก่อน
+        } catch (err) {
+            console.log(err)
+            await interaction.reply({
+                content: "❌ คุณยังไม่ได้ลงทะเบียน กรุณาใช้ `/paimon` ก่อน",
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
+        }
+        // ====== เรียก Command ที่ต้องการ verify user ก่อน ======
+        if (interaction.commandName === getInfo.data.name) {
+            await getInfo.execute(interaction,userData);
+            return;
+        }
+       // ✅ เพิ่มตรงนี้ — ก่อนเช็ค userFile เพราะ edit_user ไม่ต้อง verify แบบ user ทั่วไป
+        if (interaction.commandName === editUserCommand.data.name) {
+            await editUserCommand.execute(interaction);
+            return;
         }
         return;
     }

@@ -12,8 +12,12 @@
     "start": "node main.js"
   },
   "dependencies": {
+    "@openrouter/agent": "^0.7.2",
+    "@openrouter/sdk": "^0.13.44",
+    "axios": "^1.18.1",
     "discord.js": "^14.26.4",
     "dotenv": "^17.4.2",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "zod": "^4.4.3"
   }
 }

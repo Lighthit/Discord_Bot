@@ -12,9 +12,6 @@ export function updateLastUsed(interaction) {
     // แก้แค่ 2 ค่านี้ ค่าอื่น (id, joinedAt) คงเดิม
     data.Last_Discord_Call = interaction.guild?.id || "Direct_msg";
     data.Last_Chanel_Call = interaction.channel?.id || "Direct_msg";
-    data.Last_call = new Date().toLocaleString("en-GB", {
-                                                          timeZone: "Asia/Bangkok",
-                                                        }) 
     // เขียนกลับไฟล์เดิม
     writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
