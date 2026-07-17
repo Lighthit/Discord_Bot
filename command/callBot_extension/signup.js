@@ -1,3 +1,4 @@
+import "dotenv/config";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -9,7 +10,6 @@ import {
 
 import fs from "fs";
 import path from "path";
-
 export async function Signup(interaction) {
   const button = new ButtonBuilder()
     .setCustomId(`SignUp_NewUser&${interaction.user.id}`)
@@ -68,7 +68,7 @@ export async function handleSignUpButton(interaction) {
                                                           timeZone: "Asia/Bangkok",
                                                         }),
             AI_Model:"nvidia/nemotron-3-nano-30b-a3b:free",
-            AI_api_Keys:"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"
+            AI_api_Keys:process.env.API_KEY_OPENROUTER_FREE
 
         };
  
