@@ -1,0 +1,6 @@
+services:
+  app:
+    build: .
+    volumes:
+      - ./jobs:/app/jobs
+      - ./users_id:/app/users_id
