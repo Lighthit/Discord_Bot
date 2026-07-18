@@ -19,9 +19,23 @@ export const getInfo = {
         } catch (error) {
             console.error('Error:', error.response?.status, error.message);
         }
-        const AI_Expired = {
-            Token_Expired_At : response_tokenResult.data.data.expires_at?? 'N/A'
-        }
+
+        const dateTH = new Date(isoString);
+
+       const AI_Expired = {
+            Token_Expired_At: response_tokenResult.data.data.expires_at
+                ? new Date(response_tokenResult.data.data.expires_at).toLocaleString("en-US", {
+                    timeZone: "Asia/Bangkok",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false
+                })
+                : 'N/A'
+        };
 
         const entries = Object.entries({ ...User_info, ...AI_Expired });
         // const entries = Object.entries(User_info);

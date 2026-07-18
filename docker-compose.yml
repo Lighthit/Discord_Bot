@@ -4,3 +4,5 @@ services:
     volumes:
       - ./jobs:/app/jobs
       - ./users_id:/app/users_id
+    environment:
+      - TZ=Asia/Bangkok
