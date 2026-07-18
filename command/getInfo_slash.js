@@ -20,8 +20,6 @@ export const getInfo = {
             console.error('Error:', error.response?.status, error.message);
         }
 
-        const dateTH = new Date(isoString);
-
        const AI_Expired = {
             Token_Expired_At: response_tokenResult.data.data.expires_at
                 ? new Date(response_tokenResult.data.data.expires_at).toLocaleString("en-US", {
