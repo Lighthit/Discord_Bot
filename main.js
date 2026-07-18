@@ -15,6 +15,8 @@ import { Init_command } from "./command/signUp_slashCMD.js";
 import { getInfo } from "./command/getInfo_slash.js";
 import { handleSignUpButton } from "./command/callBot_extension/signup.js";
 import { updateLastUsed } from "./command/callBot_extension/Manages_Last_Use.js";
+import { Chatbot } from "./command/Chatbot.js";
+import { GO_DM_MSG } from "./command/Go_DM_msg.js";
 import * as editUserCommand from './command/edit_userInfo.js';
 
 const folderPath_userId = path.join(process.cwd(), "users_id");
@@ -49,6 +51,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
             return;
         }
 
+        // ✅ เพิ่มตรงนี้ — ก่อนเช็ค userFile เพราะ edit_user ไม่ต้อง verify แบบ user ทั่วไป
+        if (interaction.commandName === editUserCommand.data.name) {
+            await editUserCommand.execute(interaction);
+            return;
+        }
+
         // เช็กว่าลงทะเบียนหรือยัง
         const userFile = path.join(
             process.cwd(),
@@ -68,14 +76,22 @@ client.on(Events.InteractionCreate, async (interaction) => {
             return;
         }
         // ====== เรียก Command ที่ต้องการ verify user ก่อน ======
-        if (interaction.commandName === getInfo.data.name) {
-            await getInfo.execute(interaction,userData);
-            return;
-        }
-       // ✅ เพิ่มตรงนี้ — ก่อนเช็ค userFile เพราะ edit_user ไม่ต้อง verify แบบ user ทั่วไป
-        if (interaction.commandName === editUserCommand.data.name) {
-            await editUserCommand.execute(interaction);
-            return;
+        switch (interaction.commandName) {
+            case getInfo.data.name:
+                await getInfo.execute(interaction, userData);
+                break;
+
+            case Chatbot.data.name:
+                await Chatbot.execute(interaction, userData);
+                break;
+
+            case GO_DM_MSG.data.name:
+                await GO_DM_MSG.execute(interaction, userData);
+                break;
+
+            default:
+                console.warn(`ไม่พบคำสั่ง: ${interaction.commandName}`);
+                break;
         }
         return;
     }

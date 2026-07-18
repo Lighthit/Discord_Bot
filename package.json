@@ -8,8 +8,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon main.js",
-    "start": "node main.js"
+    "dev": " node deployment_command.js && nodemon main.js",
+    "start": "node deployment_command.js && node main.js"
   },
   "dependencies": {
     "@openrouter/agent": "^0.7.2",

@@ -8,7 +8,7 @@ Invite the bot using the provided **invite URL**. There are two invite methods:
 
 | Method | Invite URL | Description |
 |--------|-----------|--------------|
-| **User** | `https://discord.com/oauth2/authorize?client_id=1522903417742430248&permissions=8&integration_type=1&scope=bot+applications.commands` | Invite the bot to your personal account (e.g. for direct messages/private use). |
+| **User** | `https://discord.com/oauth2/authorize?client_id=1522903417742430248&integration_type=1&scope=applications.commands` | Invite the bot to your personal account (e.g. for direct messages/private use). |
 | **Server** | `https://discord.com/oauth2/authorize?client_id=1522903417742430248&permissions=8&integration_type=0&scope=bot+applications.commands` | Invite the bot to a server/workspace, making it available to all members of that server. |
 
 Once invited (via either method), the bot is added and ready to be activated.
@@ -43,12 +43,27 @@ Once activated, the bot will start responding to interactions and begin providin
   - Sets a user's `AI_Model` and `AI_api_Keys` values in one command.
   - Restricted to a whitelisted set of admin user IDs/roles — regular members cannot run this command.
 
-## Future Feature
-
-- **Ask AI** — `/ask_ai`
-  - Lets users ask the AI model directly through the bot.
+- **Chatbot** — `/chatbot`
+  - Lets users ask the AI model a question directly through the bot.
   - **Free tier**: shared pool of 50 requests/day across **all users combined** (not per-user).
   - **Paid tier**: higher/unlimited usage available — requires contacting the bot owner/admin to arrange access.
+
+- **Get DM** — `/get_dm`
+  - Instantly creates/opens a DM channel with the bot, regardless of which server channel the command is run from.
+
+## Future Feature
+
+- **Session-based Chat History**
+  - Conversation history will be stored as a session and automatically cleared every 1 day.
+
+- **Clear Session** — `/clear_session`
+  - Instantly clears the current session's chat history on demand.
+
+- **Log Notes**
+  - Ability to save and view log notes.
+
+- **Cron Schedule**
+  - Ability to create and view scheduled cron jobs.
 
 - **Notifications**
   - Automated notifications/alerts sent to users or channels for relevant events or updates.

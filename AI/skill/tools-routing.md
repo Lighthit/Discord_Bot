@@ -16,7 +16,7 @@ Split the trailing `with id {number}` from the rest of the message before classi
 ## Step 2 — Classify input_cmd
 
 ### tools 1 : check_certificate
-Use when `input_cmd` is about **checking/verifying** a certificate — status, expiry, validity, etc.
+Use when `input_cmd` is about **checking/verifying** a certificate — status, expiry, validity, IP host ,etc.
 
 → call `check_certificate(unique_id=id)`
 
