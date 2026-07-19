@@ -31,6 +31,12 @@ export async function renderPdf(htmlContent) {
         { timeout: 5000 }
     ).catch(() => {});
 
+    // รอให้ web font ทั้งหมด (โดยเฉพาะ font ของ KaTeX เช่น KaTeX_Math, KaTeX_Size1-4)
+    // โหลดและพร้อมใช้งานจริงก่อน print PDF — ถ้า print ก่อนหน้านี้ browser จะคำนวณ
+    // ตำแหน่ง/ความสูงของสัญลักษณ์คณิตศาสตร์ด้วย fallback font ชั่วคราว
+    // ทำให้สมการเลื่อนตก ไม่ตรงบรรทัดตอน print ออกมาเป็น PDF จริง
+    await page.evaluate(() => document.fonts.ready).catch(() => {});
+
     const pdfUint8Array = await page.pdf({
         format: "A4",
         printBackground: true,
