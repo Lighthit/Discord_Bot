@@ -1,6 +1,6 @@
 ---
 name: tool-routing
-description: Use when deciding which tool to call. Input always has an id appended at the end, but that id may or may not be related to certificates.
+description: Use when deciding which tool to call. Input always has an id appended at the end, but that id may or may not be related in tools.
 ---
 
 # Tool Selection Rules
@@ -47,8 +47,8 @@ If `input_cmd` is not about toold :
 
 - Do not call any tool
 - Answer normally
-- Do not mention the id to the user
-
+- Do not mention or not show the id to the user
+- Do not recommended to use tools when the user id is not related
 ## Step 3 — Multi-topic input
 
 If `input_cmd` contains multiple topics → call multiple tools, in the order they're mentioned.
