@@ -40,6 +40,20 @@ img{
     background:transparent;
 }
 
+/* กันสมการ inline ที่มีตัวห้อย+ตัวยกซ้อนกัน (เช่น T_A^B) หรือสัญลักษณ์สูง
+   ไปทับกับบรรทัดข้างบน-ล่าง เพราะ line-height ปกติของย่อหน้าไม่พอ */
+.markdown-body p,
+.markdown-body li {
+    line-height: 2.4;
+}
+
+/* สมการแบบ block (\[ ... \]) ให้มีระยะห่างบน-ล่างชัดเจน ไม่ชนข้อความรอบข้าง */
+.katex-display {
+    margin: 1.4em 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 </style>
 
 </head>
