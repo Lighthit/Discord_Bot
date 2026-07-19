@@ -24,6 +24,11 @@ export async function renderPdf(htmlContent) {
     
     const page = await browser.newPage();
 
+    // Puppeteer ใช้ CSS โหมด "print" เป็นค่าเริ่มต้นตอนสั่ง page.pdf()
+    // ซึ่งอาจทำให้ layout ที่คำนวณตำแหน่งละเอียด (เช่น KaTeX) คลาดเคลื่อนจากที่เห็นตอน
+    // เปิดดูปกติในโหมด "screen" — บังคับให้ใช้โหมด screen แทนเพื่อให้ layout ตรงกับที่ตั้งใจ
+    await page.emulateMediaType("screen");
+
     await page.setContent(html, { waitUntil: "networkidle0" });
 
     await page.waitForFunction(
