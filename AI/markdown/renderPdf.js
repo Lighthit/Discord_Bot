@@ -34,8 +34,12 @@ export async function renderPdf(htmlContent) {
     const pdfUint8Array = await page.pdf({
         format: "A4",
         printBackground: true,
-        margin: { top: "20px", bottom: "20px" }
-        // ไม่ใส่ path เลย -> ไม่เขียนไฟล์ ได้ Uint8Array กลับมาแทน
+        margin: { 
+            top: "20mm", 
+            bottom: "20mm",
+            left: "20mm",
+            right: "20mm"
+        }
     });
 
     await browser.close();
