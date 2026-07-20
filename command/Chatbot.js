@@ -5,14 +5,14 @@ import path, { join, resolve, sep } from "path";
 import { z } from 'zod';
 import { readFileSync } from 'fs';
 
-//AI Agent && AI tools && AI Skills
 import { OpenRouter } from '@openrouter/agent';
 import { checkCertificatesTool } from '../AI/tools-ai/certificate-check.js';
 import { manageCertFileTool } from '../AI/tools-ai/ManageCertList.js';
 import { getCurrentDateTool } from '../AI/tools-ai/date-time.js';
+import { getHistory, appendMessages, clearHistory } from '../AI/session/sessionManager.js';
 
-// PDF generator (ที่ทำไว้ก่อนหน้า)
 import { generatePdfBufferFromMarkdown } from "../AI/buffer/generatePdfFromMarkdown.js";
+
 export const Chatbot = {
     data: new SlashCommandBuilder()
         .setName('chatbot')
@@ -30,25 +30,38 @@ export const Chatbot = {
         const message = interaction.options.getString('message');
 
         await interaction.deferReply();
+
+
         try {
             const openrouter = new OpenRouter({
                 apiKey: userData.AI_api_Keys,
             });
+
+            // ดึง history เดิม (ถ้ามี) มาต่อ
+            const history = getHistory(userData, interaction);
+
+            const userMessage = { role: 'user', content: `${message} with id ${userData.id}` };
 
             const result = await openrouter.callModel({
                 model: userData.AI_Model,
                 input: [
                     { role: 'system', content: Persona_response },
                     { role: 'system', content: skillContent },
-                    { role: 'user', content: `${message} with id ${userData.id}` },
+                    ...history,
+                    userMessage,
                 ],
                 tools: [checkCertificatesTool, manageCertFileTool, getCurrentDateTool],
             });
 
             const Answer_Ai = await result.getText();
 
+            // บันทึก user + assistant message เข้า session (ไม่เก็บ system prompt ซ้ำทุกครั้ง)
+            appendMessages(userData, interaction, [
+                userMessage,
+                { role: 'assistant', content: Answer_Ai },
+            ]);
+
             if (Answer_Ai.length > 1900) {
-                // ยาวเกิน limit ของ discord -> ส่งทั้ง .md (ต้นฉบับ) และ .pdf (render แล้ว)
                 const pdfBuffer = await generatePdfBufferFromMarkdown(Answer_Ai, { enableToc: true });
                 const mdBuffer = Buffer.from(Answer_Ai, 'utf-8');
 

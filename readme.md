@@ -51,10 +51,12 @@ Once activated, the bot will start responding to interactions and begin providin
 - **Get DM** — `/get_dm`
   - Instantly creates/opens a DM channel with the bot, regardless of which server channel the command is run from.
 
-## Future Feature
-
 - **Session-based Chat History**
-  - Conversation history will be stored as a session and automatically cleared every 1 day.
+  - Conversation history is stored per session to give the AI context across messages.
+  - **Message limit**: keeps only the **last 20 messages** in a session; older messages are dropped once the limit is exceeded.
+  - **Time limit**: the session automatically **expires and clears after 30 minutes** of the session starting/last activity.
+
+## Future Feature
 
 - **Clear Session** — `/clear_session`
   - Instantly clears the current session's chat history on demand.

@@ -42,7 +42,7 @@ client.once(Events.ClientReady, (client) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-    
+    updateLastUsed(interaction);
     //Make last use and server Chanel RECORD!
     // ✅ Slash Command
     if (interaction.isChatInputCommand()) {
