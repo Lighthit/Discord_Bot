@@ -46,9 +46,10 @@ Use when `input_cmd` is about **getting the current date/time** — today's date
 If `input_cmd` is not about toold :
 
 - Do not call any tool
-- Answer normally
+- Answer normally (per the tone/persona defined in `persona.md`)
 - Do not mention or not show the id to the user
 - Do not recommended to use tools when the user id is not related
+
 ## Step 3 — Multi-topic input
 
 If `input_cmd` contains multiple topics → call multiple tools, in the order they're mentioned.

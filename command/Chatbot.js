@@ -25,7 +25,8 @@ export const Chatbot = {
         ),
 
     async execute(interaction, userData) {
-        const skillContent = readFileSync('./AI/skill/tools-routing.md', 'utf-8');
+        const skillContent = readFileSync('./AI/skill/persona.md', 'utf-8');
+        const Persona_response = readFileSync('./AI/skill/tools-routing.md', 'utf-8');
         const message = interaction.options.getString('message');
 
         await interaction.deferReply();
@@ -37,6 +38,7 @@ export const Chatbot = {
             const result = await openrouter.callModel({
                 model: userData.AI_Model,
                 input: [
+                    { role: 'system', content: Persona_response },
                     { role: 'system', content: skillContent },
                     { role: 'user', content: `${message} with id ${userData.id}` },
                 ],
