@@ -56,17 +56,19 @@ Once activated, the bot will start responding to interactions and begin providin
   - **Message limit**: keeps only the **last 20 messages** in a session; older messages are dropped once the limit is exceeded.
   - **Time limit**: the session automatically **expires and clears after 30 minutes** of the session starting/last activity.
 
+- **Log Notes / Reminders** — natural language via `/chatbot`
+  - Users can type in plain language through the existing `/chatbot` command to save a note or set a reminder (e.g. "จดไว้ว่า...", "เตือนฉันพรุ่งนี้...").
+  - The bot's LLM layer parses intent within the `/chatbot` conversation and stores the note/reminder automatically — no separate/dedicated command is needed.
+  - Saved notes can be retrieved later by asking the bot naturally through `/chatbot` (e.g. "มีโน้ตอะไรบ้าง").
+
 ## Future Feature
 
 - **Clear Session** — `/clear_session`
   - Instantly clears the current session's chat history on demand.
 
-- **Log Notes**
-  - Ability to save and view log notes.
-
-- **Cron Schedule**
-  - Ability to create and view scheduled cron jobs.
-
+- **Clear memory notes**
+  - Maybe clear in every 2 month in pass maybe use in other agent to manages specificaly
+  
 - **Notifications**
   - Automated notifications/alerts sent to users or channels for relevant events or updates.
 
@@ -74,4 +76,4 @@ Once activated, the bot will start responding to interactions and begin providin
 
 - Only **Administrator** accounts can run the activation command.
 - `/edit_user` is further restricted to a specific whitelist of user IDs/roles, separate from the general Administrator role.
-- Future features (selection buttons, notifications) are planned and not yet available in the current build.
+- Future features (notifications, cron scheduling) are planned and not yet available in the current build.
