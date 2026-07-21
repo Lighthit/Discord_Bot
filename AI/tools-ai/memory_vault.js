@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 const JOB_ROOT = './jobs';
 const VAULT_DIRNAME = 'memory_vault';
+const TZ_OFFSET_HOURS = 7; // Asia/Bangkok (ไม่มี DST)
 
 /* =========================================================
  * SCHEMAS — เขียนแบบเดียวกับ checkCertificatesTool
@@ -28,8 +29,9 @@ const inputSchema = z.object({
     .optional()
     .describe(
       'ชื่อ/พาธของโน้ต เช่น "projects/idea-a" (ไม่ต้องใส่ .md) — จำเป็นสำหรับ read/update/delete/backlinks. ' +
-        'สำหรับ action=create ถ้าไม่ระบุ ระบบจะสร้างให้อัตโนมัติจาก title+วันที่ ' +
-        'ห้ามใช้ชื่อกำกวมเช่น "today"/"note"/"untitled" — ให้ตั้งชื่อที่สื่อเนื้อหา เช่น "tasks/2026-07-22-depa-meeting"'
+        'สำหรับ action=create ถ้าไม่ระบุ ระบบจะสร้างให้อัตโนมัติจาก title+วันที่ (ตามเวลาไทยปัจจุบัน) ' +
+        'ห้ามใช้ชื่อกำกวมเช่น "today"/"note"/"untitled" — ให้ตั้งชื่อที่สื่อเนื้อหา เช่น "tasks/2026-07-22-depa-meeting" ' +
+        'หมายเหตุ: ถ้าใส่ปี พ.ศ./ค.ศ. เอง ให้ตรวจสอบปีปัจจุบันจริงก่อนเสมอ (ห้ามเดาปีจากความจำ)'
     ),
   title: z.string().optional().describe('ชื่อเรื่องของโน้ต'),
   content: z.string().optional().describe('เนื้อหา Markdown ของโน้ต'),
@@ -57,6 +59,7 @@ const outputSchema = z.object({
       })
     )
     .nullable(),
+  warning: z.string().nullable(),
   error: z.string().nullable(),
 });
 
@@ -90,10 +93,60 @@ function slugify(text) {
     .replace(/-+$/, '');
 }
 
+/* ---------------------------------------------------------
+ * เวลา: ใช้เวลาไทย (UTC+7) แทน UTC ตรง ๆ
+ * - nowThaiDate(): คืนค่า Date object ที่ "เลื่อน" ให้ field ปี/เดือน/วัน
+ *   (เมื่ออ่านผ่าน getUTC*) ตรงกับเวลาไทยจริง ใช้สำหรับคำนวณ prefix วันที่
+ * - nowThaiISOString(): คืนค่า ISO string พร้อม offset +07:00 (ไม่ใช่ Z)
+ *   สำหรับเก็บใน frontmatter created/updated
+ * ------------------------------------------------------- */
+
+function nowThaiDate() {
+  return new Date(Date.now() + TZ_OFFSET_HOURS * 60 * 60 * 1000);
+}
+
+function nowThaiISOString() {
+  const shifted = nowThaiDate();
+  // shifted ถูกเลื่อนมาแล้ว ใช้ toISOString() (ซึ่งเป็น UTC ของเวลาที่เลื่อนแล้ว)
+  // แล้วแทน Z ด้วย +07:00 เพื่อให้สื่อความหมายว่านี่คือเวลาไทย
+  return shifted.toISOString().replace('Z', '+07:00');
+}
+
+function thaiDatePrefix() {
+  return nowThaiDate().toISOString().slice(0, 10); // YYYY-MM-DD ตามเวลาไทย
+}
+
+function thaiYear() {
+  return nowThaiDate().getUTCFullYear();
+}
+
 function generateNotePath(title) {
-  const datePrefix = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const datePrefix = thaiDatePrefix();
   const slug = title ? slugify(title) : 'untitled';
   return `notes/${datePrefix}-${slug || 'untitled'}`;
+}
+
+/* ---------------------------------------------------------
+ * Guard: เช็คว่า note_path ที่ระบุมา (ไม่ว่าจะมาจาก agent เอง
+ * หรือ auto-generate) มี date prefix ปีที่ตรงกับปีปัจจุบัน
+ * (เวลาไทย) หรือไม่ ถ้าไม่ตรง จะไม่บล็อก/ไม่แก้ให้เงียบ ๆ
+ * แต่คืน warning กลับไปให้ agent เห็นและตัดสินใจเอง เพราะ
+ * บางกรณี note อาจตั้งใจอ้างอิงวันที่ในอดีต/อนาคตจริง ๆ
+ * ------------------------------------------------------- */
+
+function checkYearMismatch(notePath) {
+  if (!notePath) return null;
+  const match = notePath.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const current = thaiYear();
+  if (year !== current) {
+    return (
+      `note_path มีวันที่ปี ${year} แต่ปีปัจจุบัน (เวลาไทย) คือ ${current} — ` +
+      `ถ้าไม่ได้ตั้งใจอ้างอิงเหตุการณ์ปีอื่นจริง ๆ ให้ตรวจสอบและแก้ note_path/เนื้อหาใหม่`
+    );
+  }
+  return null;
 }
 
 function serializeNote({ title, tags, created, updated, content }) {
@@ -208,7 +261,8 @@ export const memoryVaultTool = tool({
   description:
     'Manages Markdown notes in ./job/{unique_id}/memory_vault. Supports create, read, ' +
     'update, delete, list, search, and backlinks. Notes support YAML-style frontmatter ' +
-    '(title, tags) and [[wiki links]] or markdown links for backlink tracking.',
+    '(title, tags) and [[wiki links]] or markdown links for backlink tracking. ' +
+    'Timestamps are recorded in Asia/Bangkok time (UTC+7).',
   inputSchema,
   outputSchema,
   execute: async (input) => {
@@ -227,6 +281,7 @@ export const memoryVaultTool = tool({
         links: null,
         count: null,
         notes: null,
+        warning: null,
         error: `note_path is required when action="${action}"`,
       };
     }
@@ -241,6 +296,7 @@ export const memoryVaultTool = tool({
         links: null,
         count: null,
         notes: null,
+        warning: null,
         error: 'query is required when action="search"',
       };
     }
@@ -253,9 +309,10 @@ export const memoryVaultTool = tool({
       switch (action) {
         case 'create': {
           const resolvedNotePath = note_path || generateNotePath(title);
+          const warning = checkYearMismatch(resolvedNotePath);
           const file = safeNoteFile(unique_id, resolvedNotePath);
           await fs.mkdir(path.dirname(file), { recursive: true });
-          const now = new Date().toISOString();
+          const now = nowThaiISOString();
           const raw = serializeNote({ title, tags, created: now, updated: now, content: content ?? '' });
           await fs.writeFile(file, raw, { flag: 'wx' }).catch(async (err) => {
             if (err.code === 'EEXIST') throw new Error(`note already exists at "${resolvedNotePath}"`);
@@ -271,6 +328,7 @@ export const memoryVaultTool = tool({
             links: extractLinks(content ?? ''),
             count: null,
             notes: null,
+            warning,
             error: null,
           };
         }
@@ -289,11 +347,13 @@ export const memoryVaultTool = tool({
             links: extractLinks(parsed.body),
             count: null,
             notes: null,
+            warning: null,
             error: null,
           };
         }
 
         case 'update': {
+          const warning = checkYearMismatch(note_path);
           const file = safeNoteFile(unique_id, note_path);
           const raw = await fs.readFile(file, 'utf8');
           const parsed = parseNote(raw);
@@ -303,8 +363,8 @@ export const memoryVaultTool = tool({
           const out = serializeNote({
             title: newTitle,
             tags: newTags,
-            created: parsed.created ?? new Date().toISOString(),
-            updated: new Date().toISOString(),
+            created: parsed.created ?? nowThaiISOString(),
+            updated: nowThaiISOString(),
             content: newBody,
           });
           await fs.writeFile(file, out);
@@ -318,6 +378,7 @@ export const memoryVaultTool = tool({
             links: extractLinks(newBody),
             count: null,
             notes: null,
+            warning,
             error: null,
           };
         }
@@ -336,6 +397,7 @@ export const memoryVaultTool = tool({
             links: null,
             count: null,
             notes: null,
+            warning: null,
             error: null,
           };
         }
@@ -364,6 +426,7 @@ export const memoryVaultTool = tool({
             links: null,
             count: notes.length,
             notes,
+            warning: null,
             error: null,
           };
         }
@@ -395,6 +458,7 @@ export const memoryVaultTool = tool({
             links: null,
             count: matches.length,
             notes: matches,
+            warning: null,
             error: null,
           };
         }
@@ -428,6 +492,7 @@ export const memoryVaultTool = tool({
             links: null,
             count: backlinks.length,
             notes: backlinks,
+            warning: null,
             error: null,
           };
         }
@@ -443,6 +508,7 @@ export const memoryVaultTool = tool({
             links: null,
             count: null,
             notes: null,
+            warning: null,
             error: `unknown action "${action}"`,
           };
       }
@@ -457,6 +523,7 @@ export const memoryVaultTool = tool({
         links: null,
         count: null,
         notes: null,
+        warning: null,
         error: err.message ?? String(err),
       };
     }

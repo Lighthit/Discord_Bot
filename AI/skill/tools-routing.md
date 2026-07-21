@@ -36,10 +36,22 @@ Determine `action` from the wording:
 → call `manageCertFileTool(uniqueId=id, action=<add|remove|edit>, url=..., newUrl=...)`
 
 ### tools 3 : get_current_date
+Use when `input_cmd` is about **getting the current date/time** — today's date, current time, timestamp, etc.
+→ call `get_current_date(format=<iso|date_only|full>)`
+
+**⚠️ Also call this tool BEFORE using `memoryVaultTool` whenever a date is involved** (see tools 4 below) — never guess or recall the current year/date from memory. Model knowledge of "today's date" is unreliable and may be off by a year or more.
 
 ### tools 4 : memoryVaultTool
 
 Use when `input_cmd` is about **managing notes in the memory vault** — saving, recalling, listing, searching, updating, or deleting knowledge/notes (e.g. "จำไว้ว่า...", "note this down", "list all notes", "search notes about...", "update the note on...", "delete note...", "find backlinks to...").
+
+**Date rule (important):** If the `action` is `create` or `update`, and either:
+- `note_path` will be auto-generated (no `note_path` given on `create`), or
+- the `content`/`title` mentions a date (today, a day of week, "this Friday", an event date, etc.),
+
+then you **must call `get_current_date` first** in the same turn, before calling `memoryVaultTool`, and use that result to resolve any relative date and to construct/verify the correct year. Never infer the current year from training knowledge.
+
+If `memoryVaultTool` returns a non-null `warning` (e.g. year mismatch between `note_path` and the actual current date), call `get_current_date` to verify, then call `memoryVaultTool` again with `action: update` to correct the note.
 
 Determine `action` from the wording:
 
@@ -58,9 +70,8 @@ Determine `action` from the wording:
 - Only pass the parameters relevant to the chosen `action` (e.g. `list` needs no `note_path`; `search` needs `query`; `create`/`update` need `note_path` and usually `content`).
 - Never call `memoryVaultTool` with `action: update` and `append: true` unless the wording clearly implies *adding to* the existing note rather than replacing it.
 - Never guess a note's content or a search result without actually calling the tool.
-Use when `input_cmd` is about **getting the current date/time** — today's date, current time, timestamp, etc.
+- Never guess the current date/year — always resolve it via `get_current_date` first (see Date rule above).
 
-→ call `get_current_date(format=<iso|date_only|full>)`
 
 ### Not tools-related
 
