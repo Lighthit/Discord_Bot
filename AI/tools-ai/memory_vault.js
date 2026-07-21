@@ -175,6 +175,30 @@ function toNotePath(baseDir, filePath) {
   return path.relative(baseDir, filePath).replace(/\.md$/, '').split(path.sep).join('/');
 }
 
+// helper: ลบโฟลเดอร์ว่างไล่ขึ้นไปจนถึง base (ไม่ลบ base เอง)
+async function pruneEmptyDirs(startDir, base) {
+  let dir = startDir;
+  const resolvedBase = path.resolve(base);
+
+  while (true) {
+    const resolvedDir = path.resolve(dir);
+    if (resolvedDir === resolvedBase || !resolvedDir.startsWith(resolvedBase)) break;
+
+    let entries;
+    try {
+      entries = await fs.readdir(resolvedDir);
+    } catch (err) {
+      if (err.code === 'ENOENT') break; // โดนลบไปแล้ว/ไม่มีอยู่จริง
+      throw err;
+    }
+
+    if (entries.length > 0) break; // ยังมีไฟล์/โฟลเดอร์อื่นอยู่ ไม่ต้องลบ
+
+    await fs.rmdir(resolvedDir);
+    dir = path.dirname(resolvedDir);
+  }
+}
+
 /* =========================================================
  * TOOL
  * ========================================================= */
@@ -301,6 +325,7 @@ export const memoryVaultTool = tool({
         case 'delete': {
           const file = safeNoteFile(unique_id, note_path);
           await fs.unlink(file);
+          await pruneEmptyDirs(path.dirname(file), base); // <-- เพิ่มบรรทัดนี้
           return {
             ok: true,
             action,
