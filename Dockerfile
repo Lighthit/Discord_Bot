@@ -4,6 +4,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
+    fonts-noto-color-emoji \
+    fonts-thai-tlwg \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 

@@ -15,6 +15,10 @@ ${css}
 
 body{
     margin:40px;
+    /* ใส่ font ภาษาไทย (Loma มาจาก fonts-thai-tlwg ที่ลงใน Dockerfile) เป็น fallback
+       เพื่อรองรับการจัดวางสระ/วรรณยุกต์ซ้อนแบบ complex script ให้ถูกต้อง
+       ป้องกันตัวอักษรไทยหายตอน Chromium subset font สำหรับ PDF */
+    font-family: "Segoe UI", "Loma", "Garuda", "Noto Sans Thai", "Noto Color Emoji" ,sans-serif;
 }
 
 .markdown-body{
