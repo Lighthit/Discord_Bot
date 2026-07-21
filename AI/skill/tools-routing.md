@@ -37,6 +37,27 @@ Determine `action` from the wording:
 
 ### tools 3 : get_current_date
 
+### tools 4 : memoryVaultTool
+
+Use when `input_cmd` is about **managing notes in the memory vault** — saving, recalling, listing, searching, updating, or deleting knowledge/notes (e.g. "จำไว้ว่า...", "note this down", "list all notes", "search notes about...", "update the note on...", "delete note...", "find backlinks to...").
+
+Determine `action` from the wording:
+
+| Wording | action |
+|---|---|
+| remember / save / note this / create a note | `create` |
+| show / open / read this note | `read` |
+| update / append / add to the note | `update` (use `append: true` if the wording implies adding rather than replacing) |
+| delete / remove this note | `delete` |
+| list all notes / show everything saved | `list` |
+| search / find notes about... | `search` |
+| what links to.../ backlinks of... | `backlinks` |
+
+→ call `memoryVaultTool(unique_id=id, action=<create|read|update|delete|list|search|backlinks>, note_path=..., title=..., content=..., tags=..., query=..., append=...)`
+
+- Only pass the parameters relevant to the chosen `action` (e.g. `list` needs no `note_path`; `search` needs `query`; `create`/`update` need `note_path` and usually `content`).
+- Never call `memoryVaultTool` with `action: update` and `append: true` unless the wording clearly implies *adding to* the existing note rather than replacing it.
+- Never guess a note's content or a search result without actually calling the tool.
 Use when `input_cmd` is about **getting the current date/time** — today's date, current time, timestamp, etc.
 
 → call `get_current_date(format=<iso|date_only|full>)`

@@ -10,7 +10,7 @@ import { checkCertificatesTool } from '../AI/tools-ai/certificate-check.js';
 import { manageCertFileTool } from '../AI/tools-ai/ManageCertList.js';
 import { getCurrentDateTool } from '../AI/tools-ai/date-time.js';
 import { getHistory, appendMessages, clearHistory } from '../AI/session/sessionManager.js';
-
+import { memoryVaultTool } from "../AI/tools-ai/memory_vault.js";
 import { generatePdfBufferFromMarkdown } from "../AI/buffer/generatePdfFromMarkdown.js";
 
 export const Chatbot = {
@@ -50,7 +50,7 @@ export const Chatbot = {
                     ...history,
                     userMessage,
                 ],
-                tools: [checkCertificatesTool, manageCertFileTool, getCurrentDateTool],
+                tools: [checkCertificatesTool, manageCertFileTool, getCurrentDateTool,memoryVaultTool],
             });
 
             const Answer_Ai = await result.getText();
