@@ -60,6 +60,12 @@ Once activated, the bot will start responding to interactions and begin providin
   - Users can type in plain language through the existing `/chatbot` command to save a note or set a reminder (e.g. "จดไว้ว่า...", "เตือนฉันพรุ่งนี้...").
   - The bot's LLM layer parses intent within the `/chatbot` conversation and stores the note/reminder automatically — no separate/dedicated command is needed.
   - Saved notes can be retrieved later by asking the bot naturally through `/chatbot` (e.g. "มีโน้ตอะไรบ้าง").
+  - **Privacy**: notes are stored per-user and scoped to the requesting user's ID — one user cannot read, search, or list another user's memory vault notes through the bot.
+
+- **Web Search** — natural language via `/chatbot`
+  - Users can ask the bot about current events, recent facts, or anything requiring up-to-date information, and it will search the web automatically as part of the `/chatbot` conversation.
+  - Powered by a free, self-hosted MCP server using **DuckDuckGo** search results — no third-party API key required, and no search API vendor receives your API credentials.
+  - Only used when the query needs real-time/external info; the bot won't search the web for things already covered by stored notes, dates, or certificate data.
 
 ## Future Feature
 
