@@ -83,22 +83,25 @@ async function saveAttachmentToVault(uniqueId, attachment) {
 
 async function collectVaultAttachmentsFromResult(uniqueId, result) {
     const attachments = [];
-    const seenPaths = new Set(); // กันไฟล์เดิมถูกแนบซ้ำ ถ้า AI เรียก read path เดิมหลายรอบ
+    const addedFiles = new Set();
 
     const rounds = result.allToolExecutionRounds ?? [];
 
     for (const round of rounds) {
         const toolMap = new Map();
+
         for (const call of round.toolCalls ?? []) {
             toolMap.set(call.id, call);
         }
 
         for (const toolResult of round.toolResults ?? []) {
             const toolCall = toolMap.get(toolResult.callId);
+
             if (!toolCall) continue;
             if (toolCall.name !== "file_vault") continue;
 
             let output = toolResult.output;
+
             if (typeof output === "string") {
                 try {
                     output = JSON.parse(output);
@@ -108,30 +111,40 @@ async function collectVaultAttachmentsFromResult(uniqueId, result) {
             }
 
             if (!output?.ok) continue;
-
-            // เอาเฉพาะผลลัพธ์จาก action "read" เท่านั้น
-            // action อื่น (เช่น "upload") ก็มี path/mime เหมือนกัน แต่ไม่ได้ตั้งใจให้แนบกลับ
-            if (output.action !== "read") continue;
             if (!output.path || !output.mime) continue;
 
-            if (seenPaths.has(output.path)) continue;
-            seenPaths.add(output.path);
+            // กันซ้ำ
+            if (addedFiles.has(output.path)) {
+                continue;
+            }
 
             try {
-                if (output.size && output.size > MAX_VAULT_ATTACHMENT_BYTES) {
+                if (
+                    output.size &&
+                    output.size > MAX_VAULT_ATTACHMENT_BYTES
+                ) {
                     console.warn(`skip ${output.path} because too large`);
                     continue;
                 }
 
-                const buffer = await readVaultFileBuffer(uniqueId, output.path);
+                const buffer = await readVaultFileBuffer(
+                    uniqueId,
+                    output.path
+                );
 
                 attachments.push(
                     new AttachmentBuilder(buffer, {
                         name: path.basename(output.path),
                     })
                 );
+
+                addedFiles.add(output.path);
             } catch (err) {
-                console.error("read vault file failed", output.path, err);
+                console.error(
+                    "read vault file failed",
+                    output.path,
+                    err
+                );
             }
         }
     }

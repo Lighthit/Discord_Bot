@@ -42,7 +42,7 @@ client.once(Events.ClientReady, (client) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-    updateLastUsed(interaction);
+    
     //Make last use and server Chanel RECORD!
     // ✅ Slash Command
     if (interaction.isChatInputCommand()) {
@@ -76,6 +76,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             return;
         }
         // ====== เรียก Command ที่ต้องการ verify user ก่อน ======
+        updateLastUsed(interaction);
         switch (interaction.commandName) {
             case getInfo.data.name:
                 await getInfo.execute(interaction, userData);

@@ -549,6 +549,20 @@ Instead respond:
   "send it back" without calling `fileVaultTool` (`read`/`info`) again
   in the same turn — history alone does not trigger file delivery.
 
+### Path Synchronization with Memory Vault
+
+If a file's path changes (for example, after a **move** or **rename** operation), you **must** search the `memoryVault` using **Tool 4 (`memoryVaultTool`)** to find any notes or records that reference the old file path.
+
+Update those references so they point to the new file path, ensuring that all links between the file vault and memory vault remain consistent.
+
+Example workflow:
+
+1. Move or rename the file using `fileVaultTool`.
+2. Search `memoryVault` for the old file path using `memoryVaultTool`.
+3. Update every matching note or record with the new file path.
+4. Never leave stale file path references in `memoryVault`.
+
+
 ### Not tools-related
 
 If `input_cmd` is not about tools:
