@@ -185,6 +185,39 @@ The **file vault stores actual files**, while `memoryVaultTool` stores Markdown 
 
 ---
 
+**⚠️ IMPORTANT — do not attempt text extraction / OCR just to "store" a file:**
+
+The rule above ("attachment presence ≠ command to read") also covers any attempt to extract,
+parse, or read the file's content as a side-effect of an upload — not just explicit calls to
+`action="read"`. This includes:
+
+- Trying to extract text from a PDF/image before or after uploading it
+- Running OCR "just to check" what's inside
+- Reporting to the user whether the file "has text" or "is a scanned image" when they never
+  asked about its content
+
+If the user's wording is only "เก็บไฟล์นี้ไว้", "save this", "อัปโหลดให้หน่อย" (or similar
+store-only intent), the correct behavior is:
+
+1. Call `fileVaultTool(action="upload", ...)` with the file as-is.
+2. Confirm to the user that the file was saved (e.g. "เก็บไฟล์ให้แล้วนะคะ").
+3. Stop there. Do NOT attempt to open, extract, OCR, or comment on whether the file's content
+   is readable/extractable — that is irrelevant to a store-only request and is not something
+   the user asked about.
+
+Only attempt extraction/OCR when:
+- The user explicitly asks to read/open/summarize the file's content, OR
+- Another tool call in the same turn already requires the extracted content for a reason the
+  user did ask for (e.g. they asked "ในไฟล์นี้เขียนว่าอะไร" and OCR is genuinely needed to answer).
+
+A store-only request should never end with a message about the file being unreadable, being a
+scan, or lacking extractable text — if the user didn't ask to see the content, whether the PDF
+has text in it is not the assistant's concern at all.
+
+---
+
+---
+
 **⚠️ IMPORTANT — attachment presence ≠ command to read:**
 
 When `input_cmd` comes with a file attached (PDF, image, doc, etc.), the mere presence of the
