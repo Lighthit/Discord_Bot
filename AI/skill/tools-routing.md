@@ -77,7 +77,30 @@ something is finished*. When answering questions about the user's records (expen
 tasks, or general notes), always show ALL matching notes — never silently drop one because you
 assumed its status. If the user specifically asks about status and the content doesn't state it,
 say so clearly instead of guessing.
-  
+
+**⚠️ IMPORTANT — always check for related attached files, not just note content:**
+A note in the memory vault is a text record only — it does NOT tell you on its own whether a
+related file (slip, receipt image, ticket PDF, passport scan, contract, etc.) was also saved in
+the file vault. Whenever you answer *any* question from `memoryVaultTool` — not just
+expense/payment questions — treat a possible attached file as part of a complete answer:
+
+- After retrieving a note (via `read`, `search`, or `list`) whose topic plausibly has a
+  supporting file (e.g. a purchase, a bill, a trip/ticket, a document reference, an ID/passport
+  note, a contract), also call `fileVaultTool(action="search")` with a relevant keyword (the
+  merchant/place/topic name, or terms like "slip", "receipt", "ticket") to check whether a
+  matching file exists.
+- If a matching file is found, **tell the user it exists** (e.g. "มีสลิป/ไฟล์แนบเก็บไว้ด้วยนะ")
+  as part of your answer — don't just silently answer from the note text alone.
+- **If showing the file is clearly useful or the user would reasonably want to see it**
+  (e.g. they're asking to confirm a payment, asking about a specific document, or explicitly
+  asking to see/send it), go ahead and call `fileVaultTool(action="read")` (or `"info"` if only
+  metadata is needed) **in the same turn** to actually return the file — don't just describe
+  that a file exists and stop there. See "Returning the Actual File to the User" under tools 6
+  for why a fresh `read`/`info` call is required to actually deliver the file.
+- If no matching file is found, do not assume one exists — answer from the note content only,
+  and you may mention that no attached file was found if relevant.
+- Never fabricate or claim a file exists without actually finding it via `fileVaultTool`.
+
 **Auto-search rule (implicit personal-data queries):**
 
 Even if the user does NOT explicitly say "ค้นใน mem" / "ดูในบันทึก" / "search notes", trigger `memoryVaultTool` automatically with `action: search` (or `list` if the query is broad/unscoped) whenever `input_cmd` asks about the user's own personal data, such as:
@@ -273,6 +296,11 @@ receives no file at all, even if you describe it correctly.
 
 If you are unsure of the exact `file_path`, call action `"search"` or
 `"list"` first to find it, then call `"read"` with the resolved path.
+
+This also applies when a matching file is found while answering a
+`memoryVaultTool` query (see the "always check for related attached
+files" rule under tools 4) — if showing the file is warranted, call
+`"read"` here in the same turn rather than only mentioning it exists.
 
 ---
 
@@ -585,6 +613,21 @@ Example workflow:
 2. Search `memoryVault` for the old file path using `memoryVaultTool`.
 3. Update every matching note or record with the new file path.
 4. Never leave stale file path references in `memoryVault`.
+
+### Evidence Linking with Memory Vault
+
+When `memoryVaultTool` returns a note whose topic plausibly has a related file (an expense/bill
+note, a trip/ticket note, a document reference, etc.), and the user's question is about that
+topic, also call `fileVaultTool(action="search")` to check for a related file before finishing
+your answer — do not report only the note content in isolation when a file may also exist.
+
+If a match is found and showing it is warranted (the user is asking to confirm something, see a
+document, or would reasonably want the file), call `fileVaultTool(action="read")` (or `"info"`
+if only metadata is needed) in the same turn to actually deliver the file — see "Returning the
+Actual File to the User" above.
+
+Never fabricate the existence of an attached file. Only report or return a file as attached if
+`fileVaultTool` actually returns a match.
 
 
 ### Not tools-related
