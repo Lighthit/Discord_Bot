@@ -2,7 +2,7 @@
 const sessions = new Map(); // key: sessionKey -> { messages: [], updatedAt: number }
 
 const MAX_HISTORY_MESSAGES = 20; // เก็บแค่ N ข้อความล่าสุด กันบวม/กิน token
-const SESSION_TTL_MS = 30 * 60 * 1000; // 30 นาที idle แล้วเคลียร์อัตโนมัติ
+const SESSION_TTL_MS = 6 * 60 * 60 * 1000; // 6 ชั่วโมง idle แล้วเคลียร์อัตโนมัติ
 
 function getSessionKey(userData, interaction) {
     // แยก session ตาม user + channel เพื่อไม่ให้ history ปนกันข้ามห้อง
