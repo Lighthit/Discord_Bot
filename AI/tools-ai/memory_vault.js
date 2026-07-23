@@ -28,10 +28,13 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'ชื่อ/พาธของโน้ต เช่น "projects/idea-a" (ไม่ต้องใส่ .md) — จำเป็นสำหรับ read/update/delete/backlinks. ' +
-        'สำหรับ action=create ถ้าไม่ระบุ ระบบจะสร้างให้อัตโนมัติจาก title+วันที่ (ตามเวลาไทยปัจจุบัน) ' +
-        'ห้ามใช้ชื่อกำกวมเช่น "today"/"note"/"untitled" — ให้ตั้งชื่อที่สื่อเนื้อหา เช่น "tasks/2026-07-22-depa-meeting" ' +
-        'หมายเหตุ: ถ้าใส่ปี พ.ศ./ค.ศ. เอง ให้ตรวจสอบปีปัจจุบันจริงก่อนเสมอ (ห้ามเดาปีจากความจำ)'
+      'Name/path of the note, e.g. "projects/idea-a" (no .md extension needed) — required for read/update/delete/backlinks. ' +
+        'For action=create, if not specified, the system will auto-generate it from title+date (based on current Thai time). ' +
+        'Do NOT use vague/ambiguous names like "today"/"note"/"untitled" — use a name that reflects the content, e.g. "tasks/2026-07-22-depa-meeting". ' +
+        'Note: if you supply the year (BE/CE) yourself, always verify the actual current year first (never guess the year from memory). ' +
+        '⚠️ The date in this path/filename is the "date the note was logged" ONLY — it must NEVER be used to infer a deadline, ' +
+        'due date, or status (paid/past/completed), whether at creation time or when this value is later read back. ' +
+        'The actual status/schedule must only be determined from the note\'s content.'
     ),
   title: z.string().optional().describe('ชื่อเรื่องของโน้ต'),
   content: z.string().optional().describe('เนื้อหา Markdown ของโน้ต'),
