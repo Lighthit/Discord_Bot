@@ -54,7 +54,7 @@ Once activated, the bot will start responding to interactions and begin providin
 - **Session-based Chat History**
   - Conversation history is stored per session to give the AI context across messages.
   - **Message limit**: keeps only the **last 20 messages** in a session; older messages are dropped once the limit is exceeded.
-  - **Time limit**: the session automatically **expires and clears after 30 minutes** of the session starting/last activity.
+  - **Time limit**: the session automatically **expires and clears after 6hours** of the session starting/last activity.
 
 - **Log Notes / Reminders** — natural language via `/chatbot`
   - Users can type in plain language through the existing `/chatbot` command to save a note or set a reminder (e.g. "จดไว้ว่า...", "เตือนฉันพรุ่งนี้...").
