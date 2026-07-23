@@ -183,6 +183,72 @@ Use when `input_cmd` is about **managing files stored in the user's file vault**
 
 The **file vault stores actual files**, while `memoryVaultTool` stores Markdown notes and knowledge.
 
+---
+
+**⚠️ IMPORTANT — attachment presence ≠ command to read:**
+
+When `input_cmd` comes with a file attached (PDF, image, doc, etc.), the mere presence of the
+attachment does NOT by itself mean the user wants the file opened, read, parsed, OCR'd, or
+summarized. Always determine the action from the user's **wording**, not from the fact that a
+file exists in the message.
+
+- If the user's message expresses only a "save / keep / store" intent (e.g. "เก็บไฟล์นี้ไว้",
+  "save this", "อัปโหลดให้หน่อย"), or if there is **no accompanying text at all** (file sent with
+  an empty/blank message), treat this as the default case → call `action="upload"` only.
+- Do **not** automatically call `action="read"`, run OCR, or extract/parse the file's content
+  in this case. Just store it.
+- Only call `action="read"` (or trigger content extraction) when the user's wording clearly asks
+  to open, view, preview, summarize, or know what's inside the file (e.g. "เปิดไฟล์นี้ให้ดูหน่อย",
+  "ในไฟล์นี้เขียนว่าอะไร", "สรุปไฟล์นี้ให้หน่อย", "read this ticket").
+
+**Quick reference**
+
+| User message (with file attached)        | Correct action |
+|-------------------------------------------|-----------------|
+| "เก็บไฟล์นี้ไว้หน่อย"                       | `upload`        |
+| (no text, just the file)                   | `upload`        |
+| "อัปโหลดเอกสารนี้ให้หน่อย"                  | `upload`        |
+| "เปิดไฟล์นี้ให้ดูหน่อย"                     | `read`          |
+| "ในไฟล์นี้เขียนว่าอะไร"                     | `read`          |
+| "สรุปไฟล์นี้ให้หน่อย"                       | `read`          |
+
+This rule applies regardless of file type (md, txt, pdf, image, etc.) and takes priority over
+any general assumption that an attached file should be inspected.
+
+---
+
+**⚠️ IMPORTANT — combined "save + view" requests:**
+
+If the user's wording asks for BOTH storing AND viewing/reading the file in the same request
+(e.g. "เก็บไฟล์นี้ไว้ แล้วเปิดดูให้หน่อย", "อัปโหลดแล้วสรุปให้ทีว่าในไฟล์มีอะไร", "save this and
+show me what's inside", "เก็บไฟล์นี้ไว้ด้วย แล้วบอกว่าข้างในเขียนว่าอะไร"), you must call
+`fileVaultTool` **twice** in the same turn:
+
+1. First call `action="upload"` to store the file.
+2. Then call `action="read"` (using the `file_path` returned/resolved from the upload) to
+   actually open and return its content to the user.
+
+Do not skip the `read` call just because `upload` already succeeded — storing a file does not
+give the user its content back. Likewise, do not skip the `upload` call just because you're
+also reading it — if the user asked to keep/save it, it must still be persisted in the vault.
+
+**Quick reference (extended)**
+
+| User message (with file attached)                                   | Correct action(s)      |
+|------------------------------------------------------------------------|-------------------------|
+| "เก็บไฟล์นี้ไว้หน่อย"                                                  | `upload`                |
+| (no text, just the file)                                               | `upload`                |
+| "เปิดไฟล์นี้ให้ดูหน่อย"                                                | `read`                  |
+| "เก็บไฟล์นี้ไว้ แล้วเปิดดูให้หน่อยว่ามีอะไรบ้าง"                        | `upload` then `read`    |
+| "อัปโหลดใบเสร็จนี้ แล้วสรุปยอดเงินให้หน่อย"                            | `upload` then `read`    |
+| "save this ticket and tell me the flight time"                        | `upload` then `read`    |
+
+If it's ambiguous whether the user wants the content read back (e.g. they only mention a
+folder/tag but don't ask "what's inside" or "show me"), default to `upload` only, and offer to
+open/read it if they want — do not assume they want the content surfaced.
+
+---
+
 **Determine action**
 
 | Wording | action |
