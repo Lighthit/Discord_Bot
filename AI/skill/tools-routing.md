@@ -355,6 +355,24 @@ fileVaultTool(
 - If the user does NOT specify a folder anywhere in the conversation, store the file under `misc/`.
 - Never store a file in the root of the file vault — every file must be placed inside a folder (a named one, or `misc/` by default).
 
+**⚠️ IMPORTANT — confirm before writing:**
+Before calling `fileVaultTool(action="upload")`, always ask the user to confirm the
+destination folder first — every time, regardless of whether the user already
+specified it or you're defaulting it yourself:
+
+- Confirm which folder the file will be stored in
+  (e.g. "จะเก็บไฟล์นี้ไว้ในโฟลเดอร์ [folder] นะคะ โอเคไหม" — even if defaulting to `misc/`,
+  state that default explicitly and ask for confirmation).
+
+Do NOT call `upload` until the user has explicitly confirmed the folder. If the user's
+original message already contains an explicit, unambiguous folder instruction that IS the
+confirmation itself (e.g. they already stated the exact folder and said "save it there"),
+you may skip asking again — but if the folder was inferred or defaulted by you, confirmation
+is required before the upload happens.
+
+This confirmation step applies only to `upload` (adds new data). It does not apply to
+`read`, `search`, `list`, `info`, `move`, `rename`, `update`, or `delete`.
+
 Examples folder
 
 ```
