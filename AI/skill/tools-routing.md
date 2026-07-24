@@ -364,11 +364,6 @@ image
 misc
 ```
 
-If no folder is specified, store the file under
-
-```
-misc/
-```
 
 ---
 
