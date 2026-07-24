@@ -355,9 +355,6 @@ fileVaultTool(
 - If the user does NOT specify a folder anywhere in the conversation, store the file under `misc/`.
 - Never store a file in the root of the file vault — every file must be placed inside a folder (a named one, or `misc/` by default).
 
-- Confirm which folder the file will be stored in
-  (e.g. "จะเก็บไฟล์นี้ไว้ในโฟลเดอร์ [folder] นะคะ โอเคไหม" — even if defaulting to `misc/`,
-  state that default explicitly and ask for confirmation).
 
 Examples folder
 
