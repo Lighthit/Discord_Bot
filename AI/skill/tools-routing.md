@@ -177,6 +177,22 @@ Determine `action` from the wording:
 | what links to.../ backlinks of... | `backlinks` |
 | implicit personal-data question (see Auto-search rule above) | `search` or `list` |
 
+**⚠️ IMPORTANT — always show the saved path after creating a note:**
+
+Whenever `memoryVaultTool` is called with `action: "create"` and the call succeeds, the reply
+to the user must always include:
+
+1. The exact `note_path` that was saved (as returned by the tool — never a guessed or
+   reconstructed path).
+2. The raw note content that was saved (title + content as actually written to the vault),
+   not a paraphrased or summarized version.
+
+Do not simply confirm "บันทึกให้แล้วนะ" without showing both of these. This applies to every
+successful `create` call, regardless of whether the note was auto-generated or user-dictated.
+
+If the `create` call fails, do not show a path — report the failure instead (see Step 4, Error
+handling).
+
 → call `memoryVaultTool(unique_id=id, action=<create|read|update|delete|list|search|backlinks>, note_path=..., title=..., content=..., tags=..., query=..., append=...)`
 
 - Only pass the parameters relevant to the chosen `action` (e.g. `list` needs no `note_path`; `search` needs `query`; `create`/`update` need `note_path` and usually `content`).
