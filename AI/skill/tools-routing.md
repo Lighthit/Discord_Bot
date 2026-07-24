@@ -750,16 +750,24 @@ Instead respond:
 
 ### Path Synchronization with Memory Vault
 
-If a file's path changes (for example, after a **move** or **rename** operation), you **must** search the `memoryVault` using **Tool 4 (`memoryVaultTool`)** to find any notes or records that reference the old file path.
+If a file's path changes (for example, after a **move** or **rename** operation via
+`fileVaultTool`), you must synchronize all references in `memoryVaultTool`:
 
-Update those references so they point to the new file path, ensuring that all links between the file vault and memory vault remain consistent.
-
-Example workflow:
-
-1. Move or rename the file using `fileVaultTool`.
-2. Search `memoryVault` for the old file path using `memoryVaultTool`.
-3. Update every matching note or record with the new file path.
-4. Never leave stale file path references in `memoryVault`.
+1. Move or rename the file using `fileVaultTool` — `fileVaultTool` is the source of
+   truth for the file's current path/filename.
+2. Call `memoryVaultTool(action="search")` (or `list` if scope is unclear) to search
+   across ALL notes for any reference matching the file's OLD filename/path.
+3. Match strictly by the filename/path itself (not just topic or keyword) — use the
+   exact old filename as returned by `fileVaultTool` before the move as the matching
+   criterion, to avoid false matches on unrelated notes that merely mention a similar
+   topic.
+4. For every note with a match, call `memoryVaultTool(action="update")` and replace
+   the old path with the NEW path/filename exactly as returned by `fileVaultTool`
+   after the move — `fileVaultTool`'s current value always wins; never guess or
+   reconstruct the new path yourself.
+5. Never leave a stale file path reference in `memoryVault`. If a note references a
+   file that no longer matches any current `fileVaultTool` entry, flag it rather than
+   silently leaving the broken reference.
 
 ### Evidence Linking with Memory Vault
 
