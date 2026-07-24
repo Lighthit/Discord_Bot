@@ -360,10 +360,6 @@ Before calling `fileVaultTool(action="upload")`, always ask the user to confirm 
 destination folder first — every time, regardless of whether the user already
 specified it or you're defaulting it yourself:
 
-- Confirm which folder the file will be stored in
-  (e.g. "จะเก็บไฟล์นี้ไว้ในโฟลเดอร์ [folder] นะคะ โอเคไหม" — even if defaulting to `misc/`,
-  state that default explicitly and ask for confirmation).
-
 Do NOT call `upload` until the user has explicitly confirmed the folder. If the user's
 original message already contains an explicit, unambiguous folder instruction that IS the
 confirmation itself (e.g. they already stated the exact folder and said "save it there"),
