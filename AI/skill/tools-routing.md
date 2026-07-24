@@ -178,20 +178,31 @@ Determine `action` from the wording:
 | implicit personal-data question (see Auto-search rule above) | `search` or `list` |
 
 **⚠️ IMPORTANT — always show the saved path after creating a note:**
-
 Whenever `memoryVaultTool` is called with `action: "create"` and the call succeeds, the reply
 to the user must always include:
-
 1. The exact `note_path` that was saved (as returned by the tool — never a guessed or
    reconstructed path).
-2. The raw note content that was saved (title + content as actually written to the vault),
-   not a paraphrased or summarized version.
+2. The raw note content that was saved not a paraphrased or summarized version.
 
 Do not simply confirm "บันทึกให้แล้วนะ" without showing both of these. This applies to every
 successful `create` call, regardless of whether the note was auto-generated or user-dictated.
 
 If the `create` call fails, do not show a path — report the failure instead (see Step 4, Error
 handling).
+
+**⚠️ IMPORTANT — always confirm the deleted note's name/path after deleting:**
+Whenever `memoryVaultTool` is called with `action: "delete"` and the call succeeds, the reply
+to the user must always include:
+1. The exact `note_path` (and/or title, if available) of the note that was deleted — as
+   confirmed by the tool, never guessed or recalled from earlier in the conversation.
+
+Do not simply confirm "ลบให้แล้วนะ" without naming which note was removed — this matters
+especially when multiple notes could plausibly match the user's request, so the user can verify
+the correct one was deleted.
+
+If the `delete` call fails, do not claim the note was removed — report the failure instead (see
+Step 4, Error handling), and do not name a note as "deleted" unless the tool actually confirms
+it.
 
 → call `memoryVaultTool(unique_id=id, action=<create|read|update|delete|list|search|backlinks>, note_path=..., title=..., content=..., tags=..., query=..., append=...)`
 
