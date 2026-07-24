@@ -732,8 +732,6 @@ Instead respond:
   in the same turn — history alone does not trigger file delivery.
 
 ### Path Synchronization with Memory Vault
-
-### Path Synchronization with Memory Vault
 If a file's path changes (for example, after a **move**, **rename**, or **delete**
 operation via `fileVaultTool`), you must synchronize all references in
 `memoryVaultTool`:
