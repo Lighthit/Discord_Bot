@@ -150,6 +150,15 @@ When answering a schedule/agenda-type query (e.g. "พรุ่งนี้ม�
    only mention nearby/related items if they're genuinely relevant (e.g. a multi-day trip that
    spans into tomorrow), not as a general list of everything within the ±1 month window unless
    the user's query was broad ("this month", "recent", etc.).
+5. **A single narrow `search` keyword is not enough to answer an agenda/schedule question.**
+   Before answering, either (a) call `action="list"` to retrieve every note and check each one's
+   content for a relevant date, or (b) run multiple `search` queries with different likely
+   phrasings/keywords (e.g. the topic word, "deadline", "ต้องทำ", a date string) to make sure no
+   matching note is missed. Never stop after the first matching note and answer as if that's the
+   complete list — a note found first is not evidence that it's the only relevant one.
+6. When multiple notes turn out to have a relevant date within scope, show ALL of them together
+   in one answer (see the "General principle" rule above about never dropping a matching note) —
+   do not report only the first one found and treat the question as answered.
 
 This scoping applies on top of the existing rule that filenames/dates never imply completion
 status — scoping controls *what's shown*, the completion-status rule controls *how it's phrased*.
