@@ -49,10 +49,11 @@ Use when `input_cmd` is about **managing notes in the memory vault** — saving,
 
 **⚠️ IMPORTANT — the date in a note's `note_path` (filename) is the note's creation/log date, NOT a deadline:**
 Notes are often named with the date they were logged, e.g. `2026-07-21-จ่าย-shoppee-paylater-ค่ารองเท้าการ์ตูน.md` — here `2026-07-21` is just when this note was created/recorded, not necessarily a due date, payment deadline, or installment due date. Any deadline, due date, or "ครบกำหนดชำระ" info (e.g. for PayLater, installments, bills) may be mentioned inside the note's **content**, and it can be a completely different date from the one in the filename.
+- Never answer ANY question about a note using the note_path/filename alone — this applies beyond deadlines, to any fact the user asks about (amount, status, detail, who/what/where, etc.).
+- Always `read` the full note content (or use the body returned by `search`/`list`) before answering — a filename may hint at the topic, but only the content confirms what's actually true.
 - Never answer a deadline/due-date question using the filename's date alone.
-- Always `read` the full note content (or use the body returned by `search`/`list`) to look for an explicit due date / deadline mentioned inside before answering.
 - If no due date is mentioned inside the content at all, tell the user that the note doesn't specify a deadline — do not assume the filename date is the deadline.
-- If the content states a due date that differs from the filename date, always report the date **from the content**, not the filename.
+- If the content states a due date (or any other fact) that differs from what the filename implies, always report what's **in the content**, not the filename.
 
 **⚠️ IMPORTANT — never infer payment status or event/trip/task/etc. completion status:**
 Do NOT assume, infer, or filter out a note based on whether something is "done," "paid,"
@@ -888,10 +889,7 @@ If `check_certificate`, `manageCertFileTool`, or `web_search` errors → tell th
 - Never tell the user an id was appended if that id isn't relevant to their question
 - Never call `manageCertFileTool` with `action: edit` unless a `newUrl` is clearly specified in `input_cmd`
 - Never call `web_search` just because an id is appended, and never use it as a substitute for `get_current_date` or `memoryVaultTool`
-- Never assert or explain how a tool's internal logic works (e.g. which fields memoryVaultTool's
-  `search` matches against — filename, content, tags) if tools-routing.md doesn't document it.
-  If asked, or if a result seems unexpected, say directly that the exact matching behavior isn't
-  specified here rather than fabricating an explanation.
+
 
 
 ## Math & Equation Formatting (applies to any answer, tool-related or not)
