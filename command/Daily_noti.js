@@ -258,7 +258,10 @@ export function restoreAllCronJobs(client) {
   const userDirs = fs.readdirSync(JOBS_ROOT_DIR);
   for (const userId of userDirs) {
     const userDir = path.join(JOBS_ROOT_DIR, userId, 'cronjob');
-    if (!fs.statSync(userDir).isDirectory()) continue;
+
+    // ✅ เช็ค existsSync ก่อน ถ้าไม่มีโฟลเดอร์ cronjob ให้ข้าม user นี้ไปเลย
+    if (!fs.existsSync(userDir) || !fs.statSync(userDir).isDirectory()) continue;
+
 
     // อ่าน userData ของ user คนนี้จาก users_id/{userId}.json (path เดียวกับ main.js)
     const userFilePath = path.join(process.cwd(), 'users_id', `${userId}.json`);
