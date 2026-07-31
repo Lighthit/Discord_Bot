@@ -24,6 +24,7 @@ const MAX_VAULT_ATTACHMENT_BYTES = 8 * 1024 * 1024; // discord จำกัด�
  * เพื่อให้ผู้เรียกเช็คแค่ .ok / .error พอ
  * ========================================================= */
 async function saveAttachmentToVault(uniqueId, attachment) {
+
     if (attachment.size > MAX_ATTACHMENT_BYTES) {
         return { ok: false, error: "ไฟล์ใหญ่เกิน 20MB" };
     }
@@ -41,6 +42,11 @@ async function saveAttachmentToVault(uniqueId, attachment) {
     await writeFile(tmpPath, buffer);
 
     try {
+        // ผลลัพธ์ตรงกับ outputSchema ของ file_vault.js เป๊ะ ๆ
+        // { ok, action, path, filename, mime, size, hash, metadata, files, count, error }
+        // เรียก runFileVaultAction ตรง ๆ แทน fileVaultTool.execute
+        // เพราะ tool() เป็น wrapper สำหรับ agent loop เท่านั้น
+        // ไม่ได้รับประกันว่า .execute จะเป็น function ที่เรียกตรงได้
         return await runFileVaultAction({
             unique_id: uniqueId,
             action: "upload",
@@ -52,6 +58,7 @@ async function saveAttachmentToVault(uniqueId, attachment) {
     } finally {
         await unlink(tmpPath).catch(() => {});
     }
+
 }
 
 /* =========================================================
@@ -62,13 +69,19 @@ async function saveAttachmentToVault(uniqueId, attachment) {
  * "allToolExecutionRounds" ซึ่งเป็น array ของแต่ละรอบการเรียก tool:
  *   { round, toolCalls: [...], response: {...}, toolResults: [...] }
  * แต่ละ toolResults[] มีรูปแบบ { toolCallId, toolName, result, error? }
+ * — toolName กับ result (= ค่าที่ execute() คืนมา) อยู่ในก้อนเดียวกันเลย
+ * ไม่ต้อง join เองผ่าน getItemsStream()/getNewMessagesStream() อีกต่อไป
  *
  * NOTE: allToolExecutionRounds ไม่ได้อยู่ในหน้า public API
- * reference ของ @openrouter/agent — SDK ยังเป็น beta อาจเปลี่ยน shape
- * ได้ในเวอร์ชันหน้า ถ้าพังให้ console.log(result) ดูโครงสร้างใหม่อีกที
+ * reference ของ @openrouter/agent (เป็น internal state ที่เห็นจาก
+ * console.log ตรง ๆ) — SDK ยังเป็น beta อาจเปลี่ยน shape ได้ใน
+ * เวอร์ชันหน้า ถ้าพังให้ console.log(result) ดูโครงสร้างใหม่อีกที
  * ========================================================= */
+
 async function collectVaultAttachmentsFromResult(uniqueId, result) {
     const attachments = [];
+    const addedFiles = new Set();
+
     const rounds = result.allToolExecutionRounds ?? [];
 
     for (const round of rounds) {
@@ -80,6 +93,7 @@ async function collectVaultAttachmentsFromResult(uniqueId, result) {
 
         for (const toolResult of round.toolResults ?? []) {
             const toolCall = toolMap.get(toolResult.callId);
+
             if (!toolCall) continue;
             if (toolCall.name !== "file_vault") continue;
 
@@ -96,21 +110,38 @@ async function collectVaultAttachmentsFromResult(uniqueId, result) {
             if (!output?.ok) continue;
             if (!output.path || !output.mime) continue;
 
+            // กันซ้ำ
+            if (addedFiles.has(output.path)) {
+                continue;
+            }
+
             try {
-                if (output.size && output.size > MAX_VAULT_ATTACHMENT_BYTES) {
+                if (
+                    output.size &&
+                    output.size > MAX_VAULT_ATTACHMENT_BYTES
+                ) {
                     console.warn(`skip ${output.path} because too large`);
                     continue;
                 }
 
-                const buffer = await readVaultFileBuffer(uniqueId, output.path);
+                const buffer = await readVaultFileBuffer(
+                    uniqueId,
+                    output.path
+                );
 
                 attachments.push(
                     new AttachmentBuilder(buffer, {
                         name: path.basename(output.path),
                     })
                 );
+
+                addedFiles.add(output.path);
             } catch (err) {
-                console.error("read vault file failed", output.path, err);
+                console.error(
+                    "read vault file failed",
+                    output.path,
+                    err
+                );
             }
         }
     }
