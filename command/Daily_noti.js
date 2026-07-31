@@ -195,13 +195,13 @@ export function activateCronJob(client, userId, cronName, { schedule, message, u
   const task = cron.schedule(schedule, async () => {
     try {
       const discordUser = await client.users.fetch(userId);
-
+      const dmChannel = await (await client.users.fetch(userId)).createDM();
       // ไม่มี interaction จริงตอน cron ทำงาน (ไม่มีคนกดคำสั่ง)
       // จึงใช้ userData ที่ผู้เรียก activateCronJob() ส่งเข้ามาตอนตั้งเวลาแทน (closure ด้านบน)
       // และใช้ค่าคงที่ต่อ cron job เป็น sessionKey
       const sessionKey = {
         guild:{id:"Direct_msg"},
-        channel:{id:"Direct_msg"},
+        channel:{id:dmChannel.id},
       };
 
       const { answer: Answer_Ai, vaultAttachments } = await MainAgents({
@@ -257,7 +257,7 @@ export function restoreAllCronJobs(client) {
 
   const userDirs = fs.readdirSync(JOBS_ROOT_DIR);
   for (const userId of userDirs) {
-    const userDir = path.join(JOBS_ROOT_DIR, userId);
+    const userDir = path.join(JOBS_ROOT_DIR, userId, 'cronjob');
     if (!fs.statSync(userDir).isDirectory()) continue;
 
     // อ่าน userData ของ user คนนี้จาก users_id/{userId}.json (path เดียวกับ main.js)

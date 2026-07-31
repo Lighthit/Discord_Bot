@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import path ,{ join } from "path";
 
 
-export function updateLastUsed(interaction) {
+export async function updateLastUsed(interaction) {
     const folderPath = path.join(process.cwd(), "users_id");
     const filePath = path.join(folderPath, `${interaction.user.id}.json`);
     // อ่านไฟล์เดิมมาก่อน

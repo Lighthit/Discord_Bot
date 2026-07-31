@@ -54,7 +54,7 @@ Once activated, the bot will start responding to interactions and begin providin
 - **Session-based Chat History**
   - Conversation history is stored per session to give the AI context across messages.
   - **Message limit**: keeps only the **last 20 messages** in a session; older messages are dropped once the limit is exceeded.
-  - **Time limit**: the session automatically **expires and clears after 6hours** of the session starting/last activity.
+  - **Time limit**: the session automatically **expires and clears after 6 hours** of the session starting/last activity.
 
 - **Log Notes / Reminders** — natural language via `/chatbot`
   - Users can type in plain language through the existing `/chatbot` command to save a note or set a reminder (e.g. "จดไว้ว่า...", "เตือนฉันพรุ่งนี้...").
@@ -67,6 +67,16 @@ Once activated, the bot will start responding to interactions and begin providin
   - Powered by a free, self-hosted MCP server using **DuckDuckGo** search results — no third-party API key required, and no search API vendor receives your API credentials.
   - Only used when the query needs real-time/external info; the bot won't search the web for things already covered by stored notes, dates, or certificate data.
 
+- **Auto Daily Work (Scheduled AI DM)** — `/opendailywork`, `/setdailywork`, `/listdailywork`, `/pausedailywork`, `/deletedailywork`
+  - Lets a registered user set up a recurring, scheduled task where the bot asks the AI a fixed prompt on a cron schedule and DMs the AI's answer back automatically — no need to ask manually each time.
+  - **`/opendailywork name:<name>`** — creates a new job slot under that name (not active yet; schedule/prompt still unset).
+  - **`/setdailywork name:<name> schedule:<cron expression> prompt:<text>`** — sets the cron schedule and the AI prompt for that job, and turns it on. Can be re-run on the same name to update schedule/prompt later.
+  - **`/listdailywork`** — shows all of the user's jobs, with name, on/off status, schedule, and ID.
+  - **`/pausedailywork name:<name>`** — temporarily stops a job without deleting its schedule/prompt; can be resumed later via `/setdailywork`.
+  - **`/deletedailywork name:<name>`** — permanently deletes a job and stops it if running.
+  - Jobs are stored per-user as JSON files and are automatically restored (re-scheduled) whenever the bot process restarts, so they survive deploys/restarts as long as the underlying storage persists.
+  - Delivery is DM-only for now (results are sent to the user's DMs, not a server channel).
+
 ## Future Feature
 
 - **Clear Session** — `/clear_session`
@@ -74,12 +84,9 @@ Once activated, the bot will start responding to interactions and begin providin
 
 - **Clear memory notes**
   - Maybe clear in every 2 month in pass maybe use in other agent to manages specificaly
-  
-- **Notifications**
-  - Automated notifications/alerts sent to users or channels for relevant events or updates.
 
 ## Notes
 
 - Only **Administrator** accounts can run the activation command.
 - `/edit_user` is further restricted to a specific whitelist of user IDs/roles, separate from the general Administrator role.
-- Future features (notifications, cron scheduling) are planned and not yet available in the current build.
+- Cron scheduling is now available via the Auto Daily Work feature above; broader event-triggered notifications are still planned and not yet available in the current build.

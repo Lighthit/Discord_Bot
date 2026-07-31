@@ -45,10 +45,10 @@ const client = new Client({
 
 client.once(Events.ClientReady, (client) => {
     console.log(`${client.user.tag} is online.`);
+    Cron_work.restoreAllCronJobs(client);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-    
     //Make last use and server Chanel RECORD!
     // ✅ Slash Command
     if (interaction.isChatInputCommand()) {
@@ -71,6 +71,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
         );
         let userData;
         try {
+            await interaction.user.createDM();
+            await updateLastUsed(interaction);
             let raw = await fsp.readFile(userFile, "utf8");
             userData = JSON.parse(raw);   // ✅ แปลงเป็น object ก่อน
         } catch (err) {
@@ -82,7 +84,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
             return;
         }
         // ====== เรียก Command ที่ต้องการ verify user ก่อน ======
-        updateLastUsed(interaction);
+        
+
         switch (interaction.commandName) {
             case getInfo.data.name:
                 await getInfo.execute(interaction, userData);
