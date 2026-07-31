@@ -1,0 +1,185 @@
+import { readFileSync } from 'fs';
+import { writeFile, unlink, mkdtemp } from 'fs/promises';
+import { tmpdir } from 'os';
+import path, { join } from 'path';
+import { AttachmentBuilder } from 'discord.js';
+
+import { OpenRouter } from '@openrouter/agent';
+import { checkCertificatesTool } from '../tools-ai/certificate-check.js';
+import { manageCertFileTool } from '../tools-ai/ManageCertList.js';
+import { getCurrentDateTool } from '../tools-ai/date-time.js';
+import { getHistory, appendMessages } from '../session/sessionManager.js';
+import { memoryVaultTool } from "../tools-ai/memory_vault.js";
+import { webSearchTool } from "../tools-ai/web-search.js";
+import { fileVaultTool, runFileVaultAction, readVaultFileBuffer } from "../tools-ai/file_vault.js";
+
+const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
+const MAX_VAULT_ATTACHMENT_BYTES = 8 * 1024 * 1024; // discord จำกัดไฟล์แนบ ~8-10MB (ตาม tier ของ server)
+
+/* =========================================================
+ * เซฟไฟล์ที่ user แนบมาใน discord ลง file_vault จริง ๆ
+ *
+ * คืนค่าเสมอในรูปแบบเดียวกับ fileVaultTool.execute()
+ * คือ { ok, error, ... } ไม่ใช้ field "reason" แยกอีกชุด
+ * เพื่อให้ผู้เรียกเช็คแค่ .ok / .error พอ
+ * ========================================================= */
+async function saveAttachmentToVault(uniqueId, attachment) {
+    if (attachment.size > MAX_ATTACHMENT_BYTES) {
+        return { ok: false, error: "ไฟล์ใหญ่เกิน 20MB" };
+    }
+
+    const res = await fetch(attachment.url);
+    if (!res.ok) {
+        return { ok: false, error: `ดาวน์โหลดไฟล์ไม่สำเร็จ (HTTP ${res.status})` };
+    }
+
+    const buffer = Buffer.from(await res.arrayBuffer());
+
+    // fileVaultTool.execute ต้องการ source_path (ไฟล์บน disk) เลยเขียนลง temp ก่อน
+    const tmpDir = await mkdtemp(join(tmpdir(), "vault-upload-"));
+    const tmpPath = join(tmpDir, attachment.name);
+    await writeFile(tmpPath, buffer);
+
+    try {
+        return await runFileVaultAction({
+            unique_id: uniqueId,
+            action: "upload",
+            source_path: tmpPath,
+            filename: attachment.name,
+            title: attachment.name,
+            description: `แนบมาจาก Discord โดยผู้ใช้ ${uniqueId}`,
+        });
+    } finally {
+        await unlink(tmpPath).catch(() => {});
+    }
+}
+
+/* =========================================================
+ * ดึง tool call ของ file_vault + ผลลัพธ์ที่มันคืนมาในเทิร์นนี้
+ * แล้วอ่านไฟล์จาก disk มาแนบกลับ discord
+ *
+ * ยืนยันจาก runtime dump จริงแล้วว่า ModelResult มี property
+ * "allToolExecutionRounds" ซึ่งเป็น array ของแต่ละรอบการเรียก tool:
+ *   { round, toolCalls: [...], response: {...}, toolResults: [...] }
+ * แต่ละ toolResults[] มีรูปแบบ { toolCallId, toolName, result, error? }
+ *
+ * NOTE: allToolExecutionRounds ไม่ได้อยู่ในหน้า public API
+ * reference ของ @openrouter/agent — SDK ยังเป็น beta อาจเปลี่ยน shape
+ * ได้ในเวอร์ชันหน้า ถ้าพังให้ console.log(result) ดูโครงสร้างใหม่อีกที
+ * ========================================================= */
+async function collectVaultAttachmentsFromResult(uniqueId, result) {
+    const attachments = [];
+    const rounds = result.allToolExecutionRounds ?? [];
+
+    for (const round of rounds) {
+        const toolMap = new Map();
+
+        for (const call of round.toolCalls ?? []) {
+            toolMap.set(call.id, call);
+        }
+
+        for (const toolResult of round.toolResults ?? []) {
+            const toolCall = toolMap.get(toolResult.callId);
+            if (!toolCall) continue;
+            if (toolCall.name !== "file_vault") continue;
+
+            let output = toolResult.output;
+
+            if (typeof output === "string") {
+                try {
+                    output = JSON.parse(output);
+                } catch {
+                    continue;
+                }
+            }
+
+            if (!output?.ok) continue;
+            if (!output.path || !output.mime) continue;
+
+            try {
+                if (output.size && output.size > MAX_VAULT_ATTACHMENT_BYTES) {
+                    console.warn(`skip ${output.path} because too large`);
+                    continue;
+                }
+
+                const buffer = await readVaultFileBuffer(uniqueId, output.path);
+
+                attachments.push(
+                    new AttachmentBuilder(buffer, {
+                        name: path.basename(output.path),
+                    })
+                );
+            } catch (err) {
+                console.error("read vault file failed", output.path, err);
+            }
+        }
+    }
+
+    return attachments;
+}
+
+/* =========================================================
+ * runChatbot: core logic ทั้งหมดของการคุยกับ AI
+ * แยกออกมาเป็นไฟล์ต่างหากจาก discord command เพื่อให้เรียกใช้
+ * จากที่อื่นได้ด้วย (message handler, cron, command อื่น ๆ)
+ *
+ * params:
+ *   - userData: ข้อมูล user (ต้องมี .id, .AI_api_Keys, .AI_Model)
+ *   - sessionKey: ตัวระบุ session สำหรับ getHistory/appendMessages
+ *       (ปกติจะส่ง interaction หรือ user id เข้ามา แล้วแต่ระบบ session)
+ *   - message: ข้อความจาก user
+ *   - attachment: discord Attachment object หรือ null
+ *
+ * return:
+ *   {
+ *     answer: string,                         // คำตอบจาก AI (raw text)
+ *     vaultAttachments: AttachmentBuilder[],   // ไฟล์จาก vault ที่ AI อ่านมาระหว่าง tool call
+ *   }
+ * ========================================================= */
+
+export async function MainAgents({ userData, sessionKey, message, attachment }) {
+    const skillContent = readFileSync('./AI/skill/persona.md', 'utf-8');
+    const Persona_response = readFileSync('./AI/skill/tools-routing.md', 'utf-8');
+
+    const openrouter = new OpenRouter({
+        apiKey: userData.AI_api_Keys,
+    });
+
+    const history = getHistory(userData, sessionKey);
+
+    let uploadNote = "";
+
+    if (attachment) {
+        const saved = await saveAttachmentToVault(userData.id, attachment);
+        uploadNote = saved.ok
+            ? ` [ผู้ใช้แนบไฟล์ "${saved.filename}" เข้า file_vault แล้ว ที่ path "${saved.path}" ใช้ tool file_vault action "read" ดูได้]`
+            : ` [ผู้ใช้พยายามแนบไฟล์ "${attachment.name}" แต่บันทึกไม่สำเร็จ: ${saved.error}]`;
+    }
+
+    const userMessage = {
+        role: 'user',
+        content: `${message} with id ${userData.id}${uploadNote}`,
+    };
+
+    const result = await openrouter.callModel({
+        model: userData.AI_Model,
+        input: [
+            { role: 'system', content: Persona_response },
+            { role: 'system', content: skillContent },
+            ...history,
+            userMessage,
+        ],
+        tools: [checkCertificatesTool, manageCertFileTool, getCurrentDateTool, memoryVaultTool, webSearchTool, fileVaultTool],
+    });
+
+    const answer = await result.getText();
+
+    appendMessages(userData, sessionKey, [
+        userMessage,
+        { role: 'assistant', content: answer },
+    ]);
+
+    const vaultAttachments = await collectVaultAttachmentsFromResult(userData.id, result);
+
+    return { answer, vaultAttachments };
+}

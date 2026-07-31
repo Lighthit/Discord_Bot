@@ -19,6 +19,12 @@ import { Chatbot } from "./command/Chatbot.js";
 import { GO_DM_MSG } from "./command/Go_DM_msg.js";
 import * as editUserCommand from './command/edit_userInfo.js';
 
+import * as Cron_work from './command/Daily_noti.js';
+import * as setDailyWork from './command/setdailywork.js';
+import * as listDailyWork from './command/listdailywork.js';
+import * as deleteDailyWork from './command/deletedailywork.js';
+import * as pauseDailyWork from './command/pausedailywork.js';
+
 const folderPath_userId = path.join(process.cwd(), "users_id");
 const folderPath_JobId_dir = path.join(process.cwd(),"jobs")
 if (!fs.existsSync(folderPath_userId)) {
@@ -42,7 +48,7 @@ client.once(Events.ClientReady, (client) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-    updateLastUsed(interaction);
+    
     //Make last use and server Chanel RECORD!
     // ✅ Slash Command
     if (interaction.isChatInputCommand()) {
@@ -76,6 +82,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             return;
         }
         // ====== เรียก Command ที่ต้องการ verify user ก่อน ======
+        updateLastUsed(interaction);
         switch (interaction.commandName) {
             case getInfo.data.name:
                 await getInfo.execute(interaction, userData);
@@ -89,6 +96,25 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 await GO_DM_MSG.execute(interaction, userData);
                 break;
 
+            case Cron_work.data.name:           
+                await Cron_work.execute(interaction, userData);
+                break;
+            
+            case setDailyWork.data.name:
+                await setDailyWork.execute(interaction, userData);
+                break;
+
+            case listDailyWork.data.name:
+                await listDailyWork.execute(interaction, userData);
+                break;
+
+            case deleteDailyWork.data.name:
+                await deleteDailyWork.execute(interaction, userData);
+                break;
+
+            case pauseDailyWork.data.name:
+                await pauseDailyWork.execute(interaction, userData);
+                break;
             default:
                 console.warn(`ไม่พบคำสั่ง: ${interaction.commandName}`);
                 break;

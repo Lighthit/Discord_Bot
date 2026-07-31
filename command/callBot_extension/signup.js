@@ -68,8 +68,8 @@ export async function handleSignUpButton(interaction) {
                                                           timeZone: "Asia/Bangkok",
                                                         }),
             AI_Model:"nvidia/nemotron-3-nano-30b-a3b:free",
-            AI_api_Keys:process.env.API_KEY_OPENROUTER_FREE
-
+            AI_api_Keys:process.env.API_KEY_OPENROUTER_FREE,
+            daily_work_noti:false
         };
  
         fs.writeFileSync(filePath, JSON.stringify(userData, null, 2));
