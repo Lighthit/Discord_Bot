@@ -25,7 +25,7 @@ export const Chatbot = {
         await interaction.deferReply();
 
         try {
-            const { answer: Answer_Ai, vaultAttachments } = await MainAgents({
+            const { answer: Answer_Ai, vaultAttachments ,total_cost} = await MainAgents({
                 userData,
                 sessionKey: interaction,
                 message,
@@ -40,12 +40,12 @@ export const Chatbot = {
                 const pdfAttachment = new AttachmentBuilder(pdfBuffer, { name: 'answer.pdf' });
 
                 await interaction.editReply({
-                    content: 'คำตอบยาวไปมันมากกว่า 2000 text discord ไม่รองรับง่า เจ้าไพม่อนเลยทำเป็นไฟล์ให้แทนนะ 📄',
+                    content: `คำตอบยาวไปมันมากกว่า 2000 text discord ไม่รองรับง่า เจ้าไพม่อนเลยทำเป็นไฟล์ให้แทนนะ 📄\n\n-# 💰 ต้นทุนครั้งนี้: $${total_cost ?? 'N/A'}`,
                     files: [pdfAttachment, mdAttachment, ...vaultAttachments],
                 });
             } else {
                 await interaction.editReply({
-                    content: Answer_Ai,
+                    content: `${Answer_Ai}\n\n-# 💰 ต้นทุนครั้งนี้: $${total_cost ?? 'N/A'}`,
                     files: vaultAttachments.length ? vaultAttachments : undefined,
                 });
             }

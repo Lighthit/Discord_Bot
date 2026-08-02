@@ -262,7 +262,7 @@ async function pruneEmptyDirs(startDir, base) {
 export const memoryVaultTool = tool({
   name: 'memory_vault',
   description:
-    'Manages Markdown notes in ./job/{unique_id}/memory_vault. Supports create, read, ' +
+    'Manages Markdown notes in ./jobs/{unique_id}/memory_vault. Supports create, read, ' +
     'update, delete, list, search, and backlinks. Notes support YAML-style frontmatter ' +
     '(title, tags) and [[wiki links]] or markdown links for backlink tracking. ' +
     'Timestamps are recorded in Asia/Bangkok time (UTC+7).',

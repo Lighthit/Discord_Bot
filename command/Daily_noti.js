@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cron from 'node-cron';
 import crypto from 'crypto';
+import { generatePdfBufferFromMarkdown } from '../AI/buffer/generatePdfFromMarkdown.js';
 import { MainAgents } from '../AI/agents/LLMS-main.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -204,20 +205,37 @@ export function activateCronJob(client, userId, cronName, { schedule, message, u
         channel:{id:dmChannel.id},
       };
 
-      const { answer: Answer_Ai, vaultAttachments } = await MainAgents({
+      const { answer: Answer_Ai, vaultAttachments,total_cost } = await MainAgents({
         userData,
         sessionKey,
         message: cronData.message, // คำสั่ง/prompt ที่ตั้งไว้ตอนสร้าง/แก้ไข cron
         attachment: undefined,
       });
 
-      if (Answer_Ai) {
-        await discordUser.send({ content: Answer_Ai });
-      }
+      // if (Answer_Ai) {
+      //   await discordUser.send({ content: Answer_Ai });
+      // }
 
-      if (vaultAttachments?.length) {
-        const files = vaultAttachments.map((att) => new AttachmentBuilder(att.path ?? att));
-        await discordUser.send({ files });
+      // if (vaultAttachments?.length) {
+      //   const files = vaultAttachments.map((att) => new AttachmentBuilder(att.path ?? att));
+      //   await discordUser.send({ files });
+      // }
+      if (Answer_Ai.length > 1900) {
+          const pdfBuffer = await generatePdfBufferFromMarkdown(Answer_Ai, { enableToc: true });
+          const mdBuffer = Buffer.from(Answer_Ai, 'utf-8');
+
+          const mdAttachment = new AttachmentBuilder(mdBuffer, { name: 'answer.md' });
+          const pdfAttachment = new AttachmentBuilder(pdfBuffer, { name: 'answer.pdf' });
+
+          await  discordUser.send({
+              content: `คำตอบยาวไปมันมากกว่า 2000 text discord ไม่รองรับง่า เจ้าไพม่อนเลยทำเป็นไฟล์ให้แทนนะ 📄\n\n-# 💰 ต้นทุนครั้งนี้: $${total_cost ?? 'N/A'}`,
+              files: [pdfAttachment, mdAttachment, ...vaultAttachments],
+          });
+      } else {
+          await  discordUser.send({
+              content: `${Answer_Ai}\n\n-# 💰 ต้นทุนครั้งนี้: $${total_cost ?? 'N/A'}`,
+              files: vaultAttachments.length ? vaultAttachments : undefined,
+          });
       }
     } catch (err) {
       console.error(`[OpenDailywork] ส่ง DM ไม่สำเร็จ (${taskKey}):`, err);

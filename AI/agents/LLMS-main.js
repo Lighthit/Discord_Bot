@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import axios from 'axios';
 import { writeFile, unlink, mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
 import path, { join } from 'path';
@@ -15,6 +16,44 @@ import { fileVaultTool, runFileVaultAction, readVaultFileBuffer } from "../tools
 
 const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 const MAX_VAULT_ATTACHMENT_BYTES = 8 * 1024 * 1024; // discord จำกัดไฟล์แนบ ~8-10MB (ตาม tier ของ server)
+
+
+
+async function getGenerationWithRetry(id, apiKey) {
+  const maxRetry = 10;
+
+  for (let i = 0; i < maxRetry; i++) {
+    try {
+      const res = await axios.get(
+        "https://openrouter.ai/api/v1/generation",
+        {
+          params: { id },
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+        }
+      );
+
+      return res.data;
+
+    } catch (err) {
+      if (err.response?.status === 404) {
+        console.log(`Generation not ready, retry ${i + 1}/${maxRetry}`);
+
+        await new Promise(resolve =>
+          setTimeout(resolve, 2000)
+        );
+
+        continue;
+      }
+
+      throw err;
+    }
+  }
+
+  throw new Error("Generation still not available");
+}
+
 
 /* =========================================================
  * เซฟไฟล์ที่ user แนบมาใน discord ลง file_vault จริง ๆ
@@ -205,6 +244,40 @@ export async function MainAgents({ userData, sessionKey, message, attachment }) 
 
     const answer = await result.getText();
 
+    
+    // console.log(result);
+    //console.dir(result.allToolExecutionRounds, { depth: null });
+    // console.log(JSON.stringify(
+    //     result.allToolExecutionRounds?.map((r, i) => ({
+    //         round: i + 1,
+    //         responseId: r.response?.id,
+    //         calls: r.toolCalls?.map(c => ({
+    //         name: c.name,
+    //         args: c.input ?? c.arguments,
+    //         })),
+    //     })),
+    //     null,
+    //     2
+    //     ));
+    const responseIds = result.allToolExecutionRounds
+        ?.map(r => r.response?.id)
+        .filter(Boolean) ?? [];
+
+    const cost_perUse = [];
+    for (const responseId of responseIds) {
+        const generation = await getGenerationWithRetry(
+            responseId,
+            userData.AI_api_Keys
+            );  
+        // console.log(generation.data.total_cost)  
+        cost_perUse.push(generation.data.total_cost)
+    }
+    const response = await result.getResponse();
+    cost_perUse.push(response.usage?.cost ?? 0)
+    // console.log(cost_perUse);
+    
+    const total_cost = cost_perUse.reduce((total, value) => total + value, 0);
+    
     appendMessages(userData, sessionKey, [
         userMessage,
         { role: 'assistant', content: answer },
@@ -212,5 +285,5 @@ export async function MainAgents({ userData, sessionKey, message, attachment }) 
 
     const vaultAttachments = await collectVaultAttachmentsFromResult(userData.id, result);
 
-    return { answer, vaultAttachments };
+    return { answer, vaultAttachments , total_cost};
 }
