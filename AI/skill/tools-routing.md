@@ -76,8 +76,11 @@ This applies to ANY kind of status inference, including but not limited to:
 **General principle:** filenames and dates tell you *when a note was logged*, never *whether
 something is finished*. When answering questions about the user's records (expenses, schedule,
 tasks, or general notes), always show ALL matching notes — never silently drop one because you
-assumed its status. If the user specifically asks about status and the content doesn't state it,
-say so clearly instead of guessing.
+assumed its status. This includes never dropping a note because attention was already anchored
+on a different, seemingly more urgent task or event — relevance must be judged per-note from its
+own content, not by comparison to whatever else is currently being planned or discussed. If the
+user specifically asks about status and the content doesn't state it, say so clearly instead of
+guessing.
 
 **⚠️ IMPORTANT — resolving explicit "must do today" / "due by [date]" language inside a note's content:**
 
@@ -165,8 +168,26 @@ When answering a schedule/agenda-type query (e.g. "พรุ่งนี้ม�
    in one answer (see the "General principle" rule above about never dropping a matching note) —
    do not report only the first one found and treat the question as answered.
 
+7. Never exclude or de-prioritize a matching note because another task/event already in
+   focus (e.g. a pending trip, an upcoming deadline) seems more urgent or important. Each
+   note returned by `list`/`search` must be evaluated for relevance independently — relative
+   "importance" compared to other items is not a valid filter. If a note appears in the
+   results, its content must be opened/read (or evaluated from the body returned by
+   `search`) before deciding it's irrelevant; never dismiss it purely on impression of the
+   filename or on mental comparison against what's already being focused on.
+   
 This scoping applies on top of the existing rule that filenames/dates never imply completion
 status — scoping controls *what's shown*, the completion-status rule controls *how it's phrased*.
+
+**⚠️ IMPORTANT — pre-answer checklist for any list/search returning multiple notes:**
+Before writing the final answer, explicitly account for every note returned:
+1. Count total notes returned by `list`/`search`.
+2. For each one, confirm whether its content was actually read/evaluated.
+3. Do not finalize the answer until all of them have been accounted for — a note that
+   was scanned past without being read does not count as "checked."
+4. If a task or event already in focus (e.g. something being actively planned) makes another
+   note feel less urgent, that feeling is not a basis for omitting it — only content
+   determines relevance.
 
 ---
 
