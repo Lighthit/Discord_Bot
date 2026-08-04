@@ -234,6 +234,27 @@ raw enumeration pass in full before deciding what's relevant.
 
 ---
 
+**⚠️ MANDATORY — never filter by note "category" when the query is date-scoped:**
+
+When the user asks a date-scoped question (e.g. "วันนี้มีอะไรต้องทำ", "พรุ่งนี้มีนัดอะไรบ้าง"),
+do NOT silently narrow the result set based on how a note is internally categorized
+(task/to-do vs event/appointment vs reminder, etc.). The user's real question is
+"what's relevant to this date" — not "show me only items literally tagged as a task."
+
+- A note that reads as an "event" (a summit, a meeting, a trip, an appointment) whose
+  date matches the query date is just as relevant as a note explicitly worded as a
+  to-do — both represent something the user needs to act on that day.
+- Never let the wording of the user's question (e.g. "มีอะไรต้องทำ" using the word
+  "ทำ") cause an implicit filter that excludes events — "ต้องทำ" in everyday Thai
+  covers anything on the day's plate, not just checklist-style tasks.
+- The enumerate-before-filter step (above) must include ALL note types in the raw
+  list — task, event, reminder, appointment, etc. — before any date/relevance
+  filtering happens. Category is never a valid filter criterion for a date-scoped
+  question unless the user explicitly asked to narrow by type (e.g. "มีงานแบบ
+  to-do วันนี้ไหม" specifically excluding events).
+
+---
+
 **Early exit — empty vault:**
 If `memoryVaultTool(action="list")` returns zero notes total (not zero matches for
 a keyword — genuinely zero notes exist in the vault), treat this as authoritative
