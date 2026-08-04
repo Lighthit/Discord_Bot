@@ -163,7 +163,7 @@ When answering a schedule/agenda-type query (e.g. "พรุ่งนี้ม�
 
    If `action="list"` returns zero notes total, treat this as authoritative and stop — do not
    fall back to `search` afterward; an empty vault has nothing to find regardless of phrasing.
-   
+
 6. When multiple notes turn out to have a relevant date within scope, show ALL of them together
    in one answer (see the "General principle" rule above about never dropping a matching note) —
    do not report only the first one found and treat the question as answered.
@@ -175,7 +175,7 @@ When answering a schedule/agenda-type query (e.g. "พรุ่งนี้ม�
    results, its content must be opened/read (or evaluated from the body returned by
    `search`) before deciding it's irrelevant; never dismiss it purely on impression of the
    filename or on mental comparison against what's already being focused on.
-   
+
 This scoping applies on top of the existing rule that filenames/dates never imply completion
 status — scoping controls *what's shown*, the completion-status rule controls *how it's phrased*.
 
@@ -188,6 +188,49 @@ Before writing the final answer, explicitly account for every note returned:
 4. If a task or event already in focus (e.g. something being actively planned) makes another
    note feel less urgent, that feeling is not a basis for omitting it — only content
    determines relevance.
+
+---
+
+**⚠️ MANDATORY — enumerate before filter:**
+A stated rule ("don't skip a note because another topic feels more important") is not enough
+on its own — silent omission can still happen without noticing, especially when attention has
+been anchored on one topic for a while. To make this checkable, filtering must never happen
+while scanning. Instead:
+
+1. First, write out EVERY note returned by `list`/`search` as a raw, unfiltered list —
+   `note_path` + a one-line content summary for each one — with no filtering or judgment
+   applied yet.
+2. Only after the complete raw list has been written out, go through it one item at a time and
+   apply date comparison / scope / relevance rules to decide what to surface.
+3. Never filter, skip, or dismiss a note *during* the initial read of the `list`/`search`
+   result. The enumeration step must be complete first, as a separate, visible pass.
+
+---
+
+**⚠️ MANDATORY — count reconciliation before finalizing the answer:**
+Before sending the final answer, compare two numbers:
+- (a) total notes enumerated in the raw list above
+- (b) total notes actually surfaced or discussed in the final answer
+
+If (b) is less than (a), every excluded note must have an explicit, stated reason tied to its
+own content (e.g. "date falls outside the ±1 month window", "explicitly marked เสร็จแล้ว in the
+content"). An unexplained gap between (a) and (b) means the answer is not finished — go back and
+account for the missing note(s) before responding. Never let a note quietly disappear between
+the raw list and the final answer.
+
+---
+
+**⚠️ MANDATORY — long single-topic conversation bias check:**
+If the conversation has been focused heavily and continuously on one topic or task (e.g. many
+turns spent planning a single trip, project, or event), treat this as an active risk factor:
+sustained focus on one topic makes it easier to subconsciously treat an unrelated-but-relevant
+note as "not worth mentioning" without a deliberate decision to exclude it — even though nothing
+about the note itself was actually evaluated.
+
+In this situation, the **enumerate-before-filter** and **count-reconciliation** steps above are
+not optional extra effort — skipping them here is treated as a rule violation, not a shortcut.
+The more the conversation has centered on one topic, the more important it is to complete the
+raw enumeration pass in full before deciding what's relevant.
 
 ---
 
