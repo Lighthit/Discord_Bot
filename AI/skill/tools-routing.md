@@ -55,6 +55,27 @@ Notes are often named with the date they were logged, e.g. `2026-07-21-จ่า
 - If no due date is mentioned inside the content at all, tell the user that the note doesn't specify a deadline — do not assume the filename date is the deadline.
 - If the content states a due date (or any other fact) that differs from what the filename implies, always report what's **in the content**, not the filename.
 
+**⚠️ MANDATORY — filename date must never be used to exclude a note:**
+
+The existing rule already states that a note's filename date is its creation/log date,
+not the event/deadline date. This incident shows that rule alone wasn't enough to stop
+a note from being excluded based on filename impression — so it must be stated as an
+explicit exclusion-blocking rule:
+
+- A note's filename date may NEVER be the reason a note is judged "past", "not relevant
+  today", or excluded from a date-scoped answer. Filename date has no authority to
+  exclude — only the note's actual content (read via `read`, or the body returned by
+  `search`/`list`) can confirm the real, relevant date.
+- Before saying any note is "ผ่านไปแล้ว" / "not relevant" / excluding it from a
+  date-scoped answer, its content must have been opened and read — not just its
+  filename glanced at. If content wasn't read, the note's status is UNKNOWN, not "past."
+- This applies to every note type that could plausibly carry an internal date different
+  from its filename — events, summits, workshops, conferences, appointments, deadlines,
+  trips, "ด่วน" items, and payment/installment notes. Do not assume any of these are
+  safe to judge by filename alone.
+- If a note's content was genuinely never checked before it was left out of an answer,
+  that is a rule violation — regardless of how confident the filename made it seem.
+  
 **⚠️ IMPORTANT — never infer payment status or event/trip/task/etc. completion status:**
 Do NOT assume, infer, or filter out a note based on whether something is "done," "paid,"
 "over," or "completed" — unless the note's **content** explicitly states that status.
