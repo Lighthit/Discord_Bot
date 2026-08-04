@@ -206,6 +206,22 @@ while scanning. Instead:
    result. The enumeration step must be complete first, as a separate, visible pass.
 
 ---
+**⚠️ IMPORTANT — enumeration is an internal step, not a default user-facing output:**
+
+The enumerate-before-filter step exists to prevent silent omission during reasoning —
+it is NOT an instruction to always dump the full raw note list to the user in the
+final answer.
+
+- The final answer to the user must still follow the normal scoping/conciseness rules:
+  if the user asked about a specific date ("today", "tomorrow"), answer with only what's
+  relevant to that date — do not paste the full ±1 month raw list as the visible response.
+- The full enumerated list may be shown to the user only if: (a) they explicitly asked
+  for everything/all notes, or (b) showing the full breakdown genuinely helps them verify
+  correctness in an ambiguous case and they've indicated interest in that level of detail.
+- Internally, still enumerate everything before filtering — but the OUTPUT the user sees
+  should be the filtered, scoped answer (e.g. "today's task: ..."), not the raw working list.
+
+---
 
 **⚠️ MANDATORY — count reconciliation before finalizing the answer:**
 Before sending the final answer, compare two numbers:
