@@ -74,7 +74,21 @@ When generating a filename for action=create:
      "until ...",
      "complete by ...",
      "finish before ...".
+     
+4. The generated filename MUST always include a top-level folder.
+   - If the note clearly belongs to a known category, use the appropriate folder
+     (e.g. `tasks/`, `projects/`, `travel/`, `meetings/`, `receipts/`, etc.).
+   - If the category cannot be determined with high confidence, the filename MUST
+     be placed under `notes/`.
+   - NEVER create files at the vault root.
 
+   Examples:
+   
+   - `notes/2026-08-05-idea-for-app`
+   - `tasks/2026-08-05-15-renew-passport`
+   - `travel/2026-08-22-25-kunming-trip`
+   - `projects/2026-08-30-2026-09-02-business-trip`
+- 
 **⚠️ MANDATORY — Rule 2: content is truth, never filename or status-word alone**
 
 A note's filename/`note_path` only tells you *when the note was logged* — never a deadline,
