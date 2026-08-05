@@ -51,8 +51,31 @@ The rules below are consolidated into 6 non-overlapping rules. Read all 6 — th
 different failure modes and none of them substitutes for another.
 
 ---
+**⚠️ MANDATORY — Rule 1: file format Create
+When generating a filename for action=create:
 
-**⚠️ MANDATORY — Rule 1: content is truth, never filename or status-word alone**
+1. Single-date notes MUST use:
+   YYYY-MM-DD-title
+
+2. Date-range notes MUST use:
+   YYYY-MM-DD-YYYY-MM-DD-title
+   or
+   YYYY-MM-DD-DD-title (only if both dates are in the same month and year).
+
+3. A note MUST be treated as a date-range note whenever the user specifies:
+   - a date range,
+   - a deadline,
+   - an end date,
+   - a duration,
+   - or phrases such as:
+     "before ...",
+     "by ...",
+     "within ...",
+     "until ...",
+     "complete by ...",
+     "finish before ...".
+
+**⚠️ MANDATORY — Rule 2: content is truth, never filename or status-word alone**
 
 A note's filename/`note_path` only tells you *when the note was logged* — never a deadline,
 never a due date, never whether something is finished, paid, or completed.
@@ -74,7 +97,7 @@ never a due date, never whether something is finished, paid, or completed.
 
 ---
 
-**⚠️ MANDATORY — Rule 2: complete the full scan before deciding what's relevant**
+**⚠️ MANDATORY — Rule 3: complete the full scan before deciding what's relevant**
 
 Silent omission happens easily — especially when the conversation has been focused on one
 other topic for a while (e.g. many turns planning a trip), which makes it easy to
@@ -121,7 +144,7 @@ evaluating it. To prevent this:
 
 ---
 
-**⚠️ IMPORTANT — Rule 3: resolve explicit date language inside the content**
+**⚠️ IMPORTANT — Rule 4: resolve explicit date language inside the content**
 
 When a note's content explicitly ties a task to "today" or to a specific end date, resolve
 that wording into a real, comparable date rather than leaving it vague:
@@ -138,7 +161,7 @@ that wording into a real, comparable date rather than leaving it vague:
 
 ---
 
-**⚠️ MANDATORY — Rule 4: the final answer shows only what was asked**
+**⚠️ MANDATORY — Rule 5: the final answer shows only what was asked**
 
 Rule 2's full scan is an internal verification step, not a template for the reply. Conflating
 the two produces answers that dump the entire vault or a long "already done" section the user
@@ -158,7 +181,7 @@ never asked for.
 
 ---
 
-**⚠️ IMPORTANT — Rule 5: also check for related attached files**
+**⚠️ IMPORTANT — Rule 6: also check for related attached files**
 
 A note is a text record only — it doesn't know whether a related file (slip, receipt, ticket,
 passport scan, contract) also exists in the file vault.
