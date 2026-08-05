@@ -245,9 +245,11 @@ final answer.
 ---
 
 **⚠️ MANDATORY — count reconciliation before finalizing the answer:**
-Before sending the final answer, compare two numbers:
-- (a) total notes enumerated in the raw list above
-- (b) total notes actually surfaced or discussed in the final answer
+Before sending the final answer, compare two numbers — this comparison is an internal
+self-check and must NEVER be written into the reply sent to the user (see the rule above
+on enumeration being an internal step, not user-facing output):
+- (a) total notes enumerated internally (not necessarily shown to the user)
+- (b) total notes actually surfaced or discussed in the visible final answer
 
 If (b) is less than (a), every excluded note must have an explicit, stated reason tied to its
 own content (e.g. "date falls outside the ±1 month window", "explicitly marked เสร็จแล้ว in the
