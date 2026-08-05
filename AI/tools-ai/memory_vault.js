@@ -29,12 +29,12 @@ const inputSchema = z.object({
     .optional()
     .describe(
       'Name/path of the note, e.g. "projects/idea-a" (no .md extension needed) — required for read/update/delete/backlinks. ' +
-        'For action=create, if not specified, the system will auto-generate it from title+date (based on current Thai time). ' +
-        'Do NOT use vague/ambiguous names like "today"/"note"/"untitled" — use a name that reflects the content, e.g. "tasks/2026-07-22-depa-meeting". ' +
-        'Note: if you supply the year (BE/CE) yourself, always verify the actual current year first (never guess the year from memory). ' +
-        '⚠️ The date in this path/filename is the "date the note was logged" ONLY — it must NEVER be used to infer a deadline, ' +
-        'due date, or status (paid/past/completed), whether at creation time or when this value is later read back. ' +
-        'The actual status/schedule must only be determined from the note\'s content.'
+      'For action=create, if not specified, the system will auto-generate it from the title and the resolved date or date range (based on current Thai time). ' +
+      'A date is considered specified if the user provides an explicit calendar date, a relative date expression (e.g. today, tomorrow, yesterday, next Monday), a deadline or duration (e.g. by Friday, before 2026-07-22, within 10 days), or a date range. Resolve all relative dates, deadlines, durations, and date ranges to actual calendar dates before generating the filename. ' +
+      'If the note represents an activity spanning a period of time (e.g. a trip, conference, vacation, project phase, multi-day event, or any task with a deadline or duration), generate the filename using the resolved date range. For deadline- or duration-based tasks, the active period starts from the resolved start date (normally today unless explicitly specified otherwise) and ends at the resolved deadline. Examples: "2026-08-22-25-kunming-trip", "2026-07-20-22-submit-report", "2026-08-05-15-renew-passport", or "2026-08-30-2026-09-02-business-trip". ' +
+      'Do NOT use vague or ambiguous names like "today", "tomorrow", "note", or "untitled" — use a descriptive name that reflects the content, e.g. "tasks/2026-07-22-depa-meeting". ' +
+      'Note: if you supply the year (BE/CE) yourself, always verify the actual current year first (never guess the year from memory). ' +
+      '⚠️ The date or date range in this path/filename is ONLY an identifier for the note. It must NEVER be used to infer the schedule, active period, deadline, due date, or status (paid/past/completed), whether at creation time or when the filename is later read back. The actual schedule, active period, deadline, and status must always be determined from the note\'s content.'
     ),
   title: z.string().optional().describe('ชื่อเรื่องของโน้ต'),
   content: z.string().optional().describe('เนื้อหา Markdown ของโน้ต'),
