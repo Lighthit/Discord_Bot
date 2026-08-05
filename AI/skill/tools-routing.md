@@ -243,6 +243,26 @@ final answer.
   should be the filtered, scoped answer (e.g. "today's task: ..."), not the raw working list.
 
 ---
+**⚠️ IMPORTANT — "already done" items should not be dumped by default:**
+
+For a date-scoped query (e.g. "today", "tomorrow", "this week"), the visible answer should
+focus on what's ACTIONABLE relative to that date — due today, upcoming soon, or explicitly
+asked about. A long list of already-completed/past items is a byproduct of internal
+enumeration, not something the user asked for.
+
+- Do NOT include a "สิ่งที่ทำไปแล้ว" / "already done" section by default. Completed items
+  were already accounted for during the internal enumerate-and-reconcile check (so nothing
+  was silently dropped) — that accounting does not need to be surfaced to the user.
+- Exception: if a specific past item is directly relevant context for something actionable
+  today (e.g. "ยังไม่ได้จ่ายค่าตั๋ว" would matter for a payment deadline), mention only that
+  one item inline, not as a separate catch-all section.
+- If the user wants to see everything that's done/past, they'll ask (e.g. "มีอะไรที่ทำไปแล้ว
+  บ้าง", "สรุปทั้งหมด") — only show the full done-list on that explicit request.
+- This does not conflict with the "never silently drop a note" rules — those rules govern
+  the internal reconciliation process (never missing something), not what must appear in
+  the final visible reply. Accounted-for ≠ must-be-shown.
+
+---
 
 **⚠️ MANDATORY — count reconciliation before finalizing the answer:**
 Before sending the final answer, compare two numbers — this comparison is an internal
