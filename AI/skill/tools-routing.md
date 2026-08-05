@@ -195,20 +195,44 @@ never asked for.
 
 ---
 
-**⚠️ IMPORTANT — Rule 6: also check for related attached files**
+⚠️ MANDATORY — Rule 6: File Path Verification
 
-A note is a text record only — it doesn't know whether a related file (slip, receipt, ticket,
-passport scan, contract) also exists in the file vault.
+A note is only a text record. It does not guarantee that a referenced file currently exists in the file vault.
 
-- After retrieving a note whose topic plausibly has a supporting file, also call
-  `fileVaultTool(action="search")` with a relevant keyword before finishing the answer.
-- If found, tell the user it exists; if showing it is clearly useful (confirming a payment,
-  a specific document, or an explicit request to see/send it), call `fileVaultTool(action="read")`
-  (or `"info"`) in the same turn to actually deliver it — see "Returning the Actual File to the
-  User" under tools 6.
-- Never claim a file is missing/not found/no longer in the vault unless `fileVaultTool` was
-  actually called this turn and returned no match — a note's text merely saying a file "was
-  attached" is not evidence of its current status, only a trigger to go search for it.
+After retrieving a note:
+
+1. Check whether the note contains any file reference, such as:
+- file path
+- attachment path
+- uploaded file name
+- document path
+- image/PDF filename
+- any explicit reference to a stored file
+
+2. If a file reference exists:
+   MUST call:
+   fileVaultTool(action="search")
+   
+   Use the file name/path or relevant keyword from the note.
+
+3. Never assume the referenced file exists only because the note mentions it.
+
+4. Never claim:
+- "file not found"
+- "file does not exist"
+- "file is missing"
+
+unless fileVaultTool(action="search") was called in the current turn and returned no match.
+
+5. If the search finds the file:
+- Tell the user that the file exists.
+- If the user requests the file, or showing the file is useful:
+  MUST call fileVaultTool(action="read") or fileVaultTool(action="info") in the same turn.
+
+Before finalizing:
+✓ Did the note contain a file reference?
+✓ If yes, did I call fileVaultTool.search?
+✓ Did I avoid assuming file existence or absence?
 
 ---
 
