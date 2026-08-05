@@ -172,6 +172,20 @@ Decide `search` vs `list`:
 - If the query is broad/unscoped (e.g. "มีโน้ตอะไรบ้าง", "มีอะไรบันทึกไว้บ้าง", "โน้ตทั้งหมดมีอะไรบ้าง", "วันนี้มีงานอะไรบ้าง" with no topic keyword) → `action: list` **directly, on the first call** — do not try `search` with guessed keywords first.
 - **When the query is about deadlines, due dates, or payment/installment schedules (e.g. PayLater, ผ่อนชำระ, บิลค่าใช้จ่าย), always follow up with `action: read` on the matching note(s) to look for the actual due date inside the content — never infer it from the filename date.**
 
+**⚠️ MANDATORY — date-scoped questions must use `list`, not `search` by date string:**
+
+A query asking about a specific date (e.g. "วันที่ 26 มีงานอะไร", "26 สิงหาคมมีนัดอะไร") must
+NOT be routed to `search` using the date as the keyword. Search matches against filename/
+title/tags — and per Rule 1, filename dates are unreliable and often differ from the real
+date inside the content. Searching "26" will miss any note whose filename date doesn't
+contain "26" even though its content does.
+
+- For any question scoped to a specific date (today, tomorrow, a named date), use `list` to
+  retrieve everything, then apply Rule 1 (read content) and Rule 2 (scan all) to find matches
+  — never rely on a date-string `search` query to do the filtering.
+- Reserve `search` for genuine topic/keyword queries (e.g. "มีโน้ตเรื่อง workshop ไหม") where
+  the search term is a real subject, not a date.
+  
 **Do NOT auto-trigger when:**
 - The question is general knowledge, not the user's own data (e.g. "ค่าครองชีพในไทยแพงไหม", "เดือนไหนมีวันหยุดเยอะสุด" — these are not personal records).
 - The question is a pure calculation with all values already given in the message (e.g. "ช่วยบวกเลข 3000+2000 ให้หน่อย").
@@ -412,10 +426,13 @@ fileVaultTool(
 )
 ```
 
-**⚠️ IMPORTANT — folder selection:**
+**⚠️ MANDATORY — folder selection, never root:**
 - If the user specifies a folder, use it.
 - If the user does NOT specify a folder anywhere in the conversation, store the file under `misc/`.
-- Never store a file in the root of the file vault — every file must be placed inside a folder (a named one, or `misc/` by default).
+- Never store a file in the root of the file vault — every file must be placed inside a folder
+  (a named one, or `misc/` by default). If a folder value is empty, missing, or unresolved for
+  any reason at call time, default to `misc/` before calling `upload` — never pass through to
+  root by omission.
 
 
 Examples folder
