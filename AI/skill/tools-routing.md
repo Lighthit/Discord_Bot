@@ -243,7 +243,7 @@ final answer.
   should be the filtered, scoped answer (e.g. "today's task: ..."), not the raw working list.
 
 ---
-**⚠️ IMPORTANT — "already done" items should not be dumped by default:**
+**⚠️ MANDATORY — "already done" items should not be dumped by default:**
 
 For a date-scoped query (e.g. "today", "tomorrow", "this week"), the visible answer should
 focus on what's ACTIONABLE relative to that date — due today, upcoming soon, or explicitly
