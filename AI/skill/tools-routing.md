@@ -85,24 +85,39 @@ evaluating it. To prevent this:
    prefer `action="list"` over guessing `search` keywords — `list` retrieves everything in one
    call. Only fall back to multiple `search` queries if `list` returns too many notes to scan
    in one pass.
-2. Go through **every single note** returned, one at a time, and read its content (or the body
-   returned by `search`/`list`) before deciding whether it's relevant — never judge relevance
-   while just skimming titles/filenames, and never stop after the first matching note.
+
+2. **Go through EVERY SINGLE NOTE one at a time and READ ITS CONTENT** (or the body
+   returned by `search`/`list`) **BEFORE deciding whether it's relevant.** ⚠️ CRITICAL:
+   - Never judge relevance while just skimming titles/filenames
+   - Never stop scanning after the first matching note
+   - **DO NOT substitute "title" or "note type" for actual content reading**
+     - Just because a note is titled "Event" or "Summit" does NOT mean it's past/irrelevant
+     - Just because it looks like a "task" or "reminder" does NOT mean you understand its date
+     - The filename date may differ from the date inside the content (Rule 1)
+   - If uncertain about a note's relevance, `read` its full content before excluding it
+   - Every excluded note must have an **explicit, stated reason** — never silently drop a note
+
 3. A note is never excluded because another task/event already feels more important or is
    already the focus of conversation. "Relative importance" and "what we've been discussing"
    are not valid filters — relevance is judged per-note, from its own content, against the
    actual date only.
-4. A note's internal category/label (task vs. event vs. reminder vs. appointment) is never a
-   valid filter for a date-scoped question either — an event on today's date is exactly as
+
+4. **A note's internal category/label (task vs. event vs. reminder vs. appointment) is NEVER
+   a valid filter for a date-scoped question.** An event on today's date is exactly as
    relevant as a to-do on today's date. Only exclude by category if the user explicitly asked
    to narrow by type.
+
 5. Scope date-relevance to **±1 month of today** by default (from content, not filename) unless
    the user's query is broader ("this month", "everything"). If `list` returns zero notes
    total, that's authoritative — stop, don't fall back to `search`.
-6. Self-check before finalizing (internal only, see Rule 4 for why this isn't shown to the
-   user): did every note that was returned get an explicit, content-based reason for being
-   included or excluded? If any note was silently dropped without a stated reason, the check
-   isn't done yet — go back and account for it.
+
+6. **Self-check before finalizing (MANDATORY):** Did every note that was returned get an
+   explicit, content-based reason for being included or excluded? Answer these questions:
+   - Did I actually READ the content of every note returned by `list`/`search`?
+   - Did I exclude any note based only on its title, filename date, or type (task/event)?
+   - Did I exclude any note without stating a reason out loud?
+   - If the answer to ANY of these is "yes", the check is NOT done — go back and read
+     the content of those notes before finalizing your answer.
 
 ---
 
