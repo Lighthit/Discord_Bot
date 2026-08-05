@@ -227,7 +227,7 @@ while scanning. Instead:
    result. The enumeration step must be complete first, as a separate, visible pass.
 
 ---
-**⚠️ IMPORTANT — enumeration is an internal step, not a default user-facing output:**
+**⚠️ MANDATORY — enumeration is an internal step, not a default user-facing output:**
 
 The enumerate-before-filter step exists to prevent silent omission during reasoning —
 it is NOT an instruction to always dump the full raw note list to the user in the
