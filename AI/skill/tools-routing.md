@@ -282,13 +282,30 @@ Do NOT use `web_search` for:
 
 ### tools 6 : fileVaultTool
 
+⚠️ MANDATORY — Upload every attached file first
+
+Whenever the current user message contains one or more attached files, you MUST
+call `fileVaultTool(action="upload")` before performing any other operation on
+those files.
+
+This rule applies whenever the current message contains one or more attached files.
+
+- If the user only wants to save the file:
+  → upload only.
+
+- If the user wants to read, summarize, OCR, analyze, or otherwise inspect the
+  file:
+  → upload first, then perform the requested action(s).
+
+This rule takes precedence over all other file-handling rules below.
+
 Use when `input_cmd` is about **managing files stored in the user's file vault** — uploading, saving, reading, listing, searching, updating metadata, renaming, moving, or deleting files such as PDFs, images, tickets, receipts, passports, invoices, contracts, Word/Excel documents, ZIP files, and other user documents.
 
 The **file vault stores actual files**, while `memoryVaultTool` stores Markdown notes and knowledge.
 
 ---
 
-**⚠️ IMPORTANT — do not attempt text extraction / OCR just to "store" a file:**
+**⚠️ MANDATORY — do not attempt text extraction / OCR just to "store" a file:**
 
 The rule above ("attachment presence ≠ command to read") also covers any attempt to extract,
 parse, or read the file's content as a side-effect of an upload — not just explicit calls to
