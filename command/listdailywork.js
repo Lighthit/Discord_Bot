@@ -23,8 +23,6 @@ export async function execute(interaction, userData) {
     .setDescription(
       jobs
         .map((job) => {
-          const test = cronJobs.get(job.id);
-          console.log("Jobs:",test.getStatus());
           const status = job.enabled ? '🟢 เปิดใช้งาน' : '⚪ ยังไม่เปิดใช้งาน';
           const schedule = job.schedule ? `\`${job.schedule}\`` : '_ยังไม่ตั้งเวลา_';
           return `**${job.name}** — ${status}\nเวลา: ${schedule}\nID: \`${job.id}\``;
