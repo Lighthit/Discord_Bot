@@ -6,12 +6,11 @@ import cron from 'node-cron';
 import crypto from 'crypto';
 import { generatePdfBufferFromMarkdown } from '../AI/buffer/generatePdfFromMarkdown.js';
 import { MainAgents } from '../AI/agents/LLMS-main.js';
+import { setCronTask, stopCronTask } from './Crontab/Manager.js'; // ปรับ path ให้ตรงกับตำแหน่งไฟล์จริง
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// เก็บ task ที่กำลังรันอยู่ในหน่วยความจำ (key = `${userId}:${cronName}`)
-// ถ้าคุณมี cron manager กลางของบอทอยู่แล้ว แนะนำให้ import instance เดียวกันมาใช้แทนตัวนี้
-const activeCronTasks = new Map();
+// state ของ task ที่กำลังรันอยู่ถูกย้ายไป cronManager.js แล้ว (รวมศูนย์ ให้ไฟล์อื่น import ใช้ได้ด้วย)
 
 const JOBS_ROOT_DIR = path.join(process.cwd(), 'jobs');
 
@@ -140,11 +139,8 @@ export function listCronJobs(userId) {
  * ลบ cron job ทั้งไฟล์ + หยุด task ที่รันอยู่ (ถ้ามี)
  */
 export function deleteCronJob(userId, cronName) {
-  const taskKey = `${userId}:${cronName}`;
-  if (activeCronTasks.has(taskKey)) {
-    activeCronTasks.get(taskKey).stop();
-    activeCronTasks.delete(taskKey);
-  }
+  stopCronTask(userId, cronName);
+
   const filePath = getCronFilePath(userId, cronName);
   if (fs.existsSync(filePath)) {
     fs.unlinkSync(filePath);
@@ -185,13 +181,8 @@ export function activateCronJob(client, userId, cronName, { schedule, message, u
   cronData.updatedAt = new Date().toISOString();
   fs.writeFileSync(filePath, JSON.stringify(cronData, null, 2), 'utf-8');
 
-  const taskKey = `${userId}:${cronName}`;
-
-  // ถ้ามี task เดิมรันอยู่ ให้หยุดก่อน
-  if (activeCronTasks.has(taskKey)) {
-    activeCronTasks.get(taskKey).stop();
-    activeCronTasks.delete(taskKey);
-  }
+  // ถ้ามี task เดิมรันอยู่ ให้หยุดก่อน (กัน task ค้าง/ซ้อนกัน)
+  stopCronTask(userId, cronName);
 
   const task = cron.schedule(schedule, async () => {
     try {
@@ -238,23 +229,20 @@ export function activateCronJob(client, userId, cronName, { schedule, message, u
           });
       }
     } catch (err) {
-      console.error(`[OpenDailywork] ส่ง DM ไม่สำเร็จ (${taskKey}):`, err);
+      console.error(`[OpenDailywork] ส่ง DM ไม่สำเร็จ (${userId}:${cronName}):`, err);
     }
   });
 
-  activeCronTasks.set(taskKey, task);
+  setCronTask(userId, cronName, task);
   return cronData;
 }
 
 /**
  * หยุด cron task ที่กำลังรันอยู่ (ไม่ลบไฟล์ ตั้ง enabled = false)
+ * @returns {boolean} true ถ้ามี task ที่กำลังรันอยู่จริงและถูกหยุด, false ถ้าไม่มี task ให้หยุด
  */
 export function deactivateCronJob(userId, cronName) {
-  const taskKey = `${userId}:${cronName}`;
-  if (activeCronTasks.has(taskKey)) {
-    activeCronTasks.get(taskKey).stop();
-    activeCronTasks.delete(taskKey);
-  }
+  const stopped = stopCronTask(userId, cronName);
 
   const filePath = getCronFilePath(userId, cronName);
   if (fs.existsSync(filePath)) {
@@ -263,6 +251,8 @@ export function deactivateCronJob(userId, cronName) {
     cronData.updatedAt = new Date().toISOString();
     fs.writeFileSync(filePath, JSON.stringify(cronData, null, 2), 'utf-8');
   }
+
+  return stopped;
 }
 
 /**

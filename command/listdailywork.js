@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder , MessageFlags} from 'discord.js';
 import { listCronJobs } from './Daily_noti.js';
-import cron from "node-cron";
+import { hasCronTask } from './Crontab/Manager.js'; // ปรับ path ให้ตรงกับตำแหน่งไฟล์จริง
 
 export const data = new SlashCommandBuilder()
   .setName('listdailywork')
@@ -23,7 +23,21 @@ export async function execute(interaction, userData) {
     .setDescription(
       jobs
         .map((job) => {
-          const status = job.enabled ? '🟢 เปิดใช้งาน' : '⚪ ยังไม่เปิดใช้งาน';
+          // เช็คสถานะจริงจาก cronManager (มี task รันอยู่ในหน่วยความจำไหม)
+          // แทนที่จะเชื่อ job.enabled จากไฟล์เพียวๆ เพราะอาจ desync ได้
+          // เช่นตอนบอท restart แล้ว restore task ไม่สำเร็จ
+          const isRunning = hasCronTask(userData.id, job.name);
+
+          let status;
+          if (isRunning) {
+            status = '🟢 เปิดใช้งาน รอเวลา run';
+          } else if (job.enabled) {
+            // ไฟล์บอกว่า enabled แต่ไม่มี task จริงรันอยู่ -> แจ้งเตือนผู้ใช้
+            status = '🔴 ควรเปิดใช้งานแต่ไม่มี task รันอยู่ (ลอง /setdailywork ใหม่)';
+          } else {
+            status = '⚪ ยังไม่เปิดใช้งาน';
+          }
+
           const schedule = job.schedule ? `\`${job.schedule}\`` : '_ยังไม่ตั้งเวลา_';
           return `**${job.name}** — ${status}\nเวลา: ${schedule}\nID: \`${job.id}\``;
         })
