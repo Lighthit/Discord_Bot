@@ -7,7 +7,7 @@ echo "Starting deployment..."
 echo "=================================="
 
 echo "Pulling latest code..."
-git pull
+git pull --ff-only
 
 echo "Stopping containers..."
 docker compose down
