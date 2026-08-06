@@ -1,5 +1,7 @@
 services:
-  app:
+  main:
+    image: discord-bot:lasted
+    container_name: discordbot-main
     build: .
     volumes:
       - ./jobs:/app/jobs
