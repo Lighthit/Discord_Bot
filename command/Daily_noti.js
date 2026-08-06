@@ -130,7 +130,6 @@ export function loadCronJob(userId, cronName) {
 export function listCronJobs(userId) {
   const dir = getUserJobsDir(userId);
   if (!fs.existsSync(dir)) return [];
-  console.log("Jobs ln:133 " ,activeCronTasks.get(taskKey))
   return fs
     .readdirSync(dir)
     .filter((f) => f.endsWith('.json'))
