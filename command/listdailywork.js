@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder , MessageFlags} from 'discord.js';
 import { listCronJobs } from './Daily_noti.js';
+import cron from "node-cron";
 
 export const data = new SlashCommandBuilder()
   .setName('listdailywork')
@@ -22,7 +23,8 @@ export async function execute(interaction, userData) {
     .setDescription(
       jobs
         .map((job) => {
-          console.log("Jobs:",job.getStatus());
+          const test = cronJobs.get(job.id);
+          console.log("Jobs:",test.getStatus());
           const status = job.enabled ? '🟢 เปิดใช้งาน' : '⚪ ยังไม่เปิดใช้งาน';
           const schedule = job.schedule ? `\`${job.schedule}\`` : '_ยังไม่ตั้งเวลา_';
           return `**${job.name}** — ${status}\nเวลา: ${schedule}\nID: \`${job.id}\``;
